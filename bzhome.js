@@ -18,14 +18,25 @@ $(document).ready(function() {
    });
    
    $("#file-form").submit(function(event) {
-      // when the user presses "Enter" in file bug input
       event.preventDefault();
 
-      var [product, component] = $("#file-component").val().split("/");
-      window.open(bzhome.base + "/enter_bug.cgi?" +
-                  "product=" + encodeURIComponent(product) + "&" +
-                  "component=" + encodeURIComponent(component));
+      var [product, component] = $("#file-form .component-search").val().split("/");
+      window.open(bzhome.base + "/enter_bug.cgi?"
+                  + "product=" + encodeURIComponent(product) + "&"
+                  + "component=" + encodeURIComponent(component));
    });
+   
+   $("#search-form").submit(function(event) {
+      event.preventDefault();
+
+      var [product, component] = $("#search-form .component-search").val().split("/");      
+      window.open(bzhome.base + "/buglist.cgi?"
+                  + "order=Last%20Changed&order=changeddate%20DESC" 
+                  + "&product=" + encodeURIComponent(product) 
+                  + "&component=" + encodeURIComponent(component));
+      
+   });
+   $("#search-bugs").hide();
 });
 
 var bzhome = {
@@ -80,7 +91,8 @@ var bzhome = {
                });
             }
          }
-         $("#file-component").autocomplete({
+         
+         $(".component-search").autocomplete({
            list: components,
            minCharacters: 2,
            timeout: 200,
@@ -102,7 +114,7 @@ var bzhome = {
            insertText: function(item) {
               return item.string;
            }
-         })
+         });
       });
       
       var reviews = $("#reviews .content");

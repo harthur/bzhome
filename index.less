@@ -171,36 +171,51 @@ section {
 
 #side {
    float: right;
-   width: 310px;
+   width: 312px;
 }
 
-#file-bug {
+.components {
    border-radius: 4px;
    margin-bottom: 1.5em;
 
    .header {
-      background-color: #E1F6DC;
       border-radius: 4px;
    }
    
-   #file-form {
+   form {
       display: inline-block;
    }
    
-   #file-submit {
-     background: -moz-linear-gradient(center top , #F4F4F4, #ECECEC) repeat scroll 0 0 transparent;
-     border: 1px solid #D4D4D4;
-     border-radius: 3px;
-     color: #333333;
-     cursor: pointer;
-     display: inline-block;
-     text-shadow: 1px 1px 0 #FFFFFF;
-     padding: 3px 6px;
+   .component-label {
+      display: inline-block;
+      width: 58px;
+   }
+   
+   .component-submit {
+      background: -moz-linear-gradient(center top , #F4F4F4, #ECECEC) repeat scroll 0 0 transparent;
+      border: 1px solid #D4D4D4;
+      border-radius: 3px;
+      color: #333333;
+      cursor: pointer;
+      display: inline-block;
+      text-shadow: 1px 1px 0 #FFFFFF;
+      padding: 3px 6px;
    }
 
-   #file-component {
-      margin-left: 6px;
-      width: 170px;
+   .component-search {
+      margin-left: 0.5em;
+   }
+}
+
+#file-bug {
+   .header {
+      background-color: #E1F6DC;
+   }
+}
+
+#search-bugs {
+   .header {
+      background-color: #FCF7E1;
    }
 }
 
