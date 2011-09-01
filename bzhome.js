@@ -118,7 +118,7 @@ var bzhome = {
       });
       
       var reviews = $("#reviews .content");
-      reviews.html("<img src='/lib/indicator.gif' class='spinner'></img>");
+      reviews.html("<img src='lib/indicator.gif' class='spinner'></img>");
 
       user.requests(function(err, requests) {
          reviews.empty();
@@ -132,7 +132,7 @@ var bzhome = {
       });
       
       var assigned = $("#assigned .content");
-      assigned.html("<img src='/lib/indicator.gif' class='spinner'></img>");
+      assigned.html("<img src='lib/indicator.gif' class='spinner'></img>");
 
       user.assigned(function(err, bugs) {
          assigned.empty();
@@ -146,7 +146,7 @@ var bzhome = {
       });
       
       var timeline = $("#timeline .content");
-      timeline.html("<img src='/lib/indicator.gif' class='spinner'></img>");
+      timeline.html("<img src='lib/indicator.gif' class='spinner'></img>");
       
       user.timeline(1.5, function(err, items) {
         timeline.empty();
