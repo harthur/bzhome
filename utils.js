@@ -18,5 +18,19 @@ var utils = {
          query[pair[0]] = unescape(pair[1]);
       }
       return query;
+   },
+   
+   smallSpinner : function(elem) {
+      var opts = {
+        lines: 8, // The number of lines to draw
+        length: 2, // The length of each line
+        width: 2, // The line thickness
+        radius: 2, // The radius of the inner circle
+        color: '#000', // #rbg or #rrggbb
+        speed: 1, // Rounds per second
+        trail: 60, // Afterglow percentage
+        shadow: false // Whether to render a shadow
+      };
+      return new Spinner(opts).spin(elem);
    }
 }

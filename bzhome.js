@@ -118,7 +118,8 @@ var bzhome = {
       });
       
       var reviews = $("#reviews .content");
-      reviews.html("<img src='/lib/indicator.gif' class='spinner'></img>");
+      utils.smallSpinner(reviews.get(0));
+      //reviews.html("<img src='/lib/indicator.gif' class='spinner'></img>");
 
       user.requests(function(err, requests) {
          reviews.empty();
@@ -132,7 +133,9 @@ var bzhome = {
       });
       
       var assigned = $("#assigned .content");
-      assigned.html("<img src='/lib/indicator.gif' class='spinner'></img>");
+      utils.smallSpinner(assigned.get(0));
+      
+      //assigned.html("<img src='/lib/indicator.gif' class='spinner'></img>");
 
       user.assigned(function(err, bugs) {
          assigned.empty();
@@ -146,7 +149,8 @@ var bzhome = {
       });
       
       var timeline = $("#timeline .content");
-      timeline.html("<img src='/lib/indicator.gif' class='spinner'></img>");
+      utils.smallSpinner(timeline.get(0));
+      //timeline.html("<img src='/lib/indicator.gif' class='spinner'></img>");
       
       user.timeline(1.5, function(err, items) {
         timeline.empty();
