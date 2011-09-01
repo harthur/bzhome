@@ -10,18 +10,19 @@
   <script src="lib/jquery-1.4.2.min.js" type="text/javascript"></script>
   <script src="lib/jquery.timeago.js" type="text/javascript"></script>
   <script src="lib/jquery.ui.autocomplete.js"></script>
-  <script src="lib/bz-0.2.1.js" type="text/javascript"></script>
+  <script src="lib/bz-0.2.2.js" type="text/javascript"></script>
   <script src="lib/handlebars.js" type="text/javascript"></script>
   <script src="lib/ba-linkify.min.js"></script>
   <script src="lib/underscore-min.js"></script>
+  <script src="lib/async.min.js"></script>
 
   <script src="user.js"></script>
   <script src="handlers.js"></script>
   <script src="bzhome.js"></script>
   <script src="utils.js"></script>
   
-  <script id="timeline-item" type="text/html">
-    <div class="timeline-item">
+  <script id="timeline-bug" type="text/html">
+    <div id="{{bug.id}}"class="timeline-item">
       <div class="timeline-bug bug">
         <a href="{{show_bug bug.id}}" class="bug-title" title="{{> bug_tooltip}}">
           <img id="bug-icon" hidden=true src="lib/bugzilla.png"/>
@@ -30,88 +31,90 @@
         </a>
         <span class="bug-updated"><span class="timeago" title="{{bug.last_change_time}}"></span></span>
       </div>
-      <div class="timeline-events">
-        {{#format_events}}
-        {{#each events}}
-          <div class="event">
-          {{#if comment}}
-             <div class="comment-item">
-             {{#format_comment comment}}
-               {{#if created}}
-                 <span class="comment-on">Created 
-                   <a href={{show_attach created.id diff}}>
-                     attachment {{created.id}} - {{created.title}}
-                   </a>
-                 </span>
-               {{/if}}
-               <span class="commenter name">{{format_name creator.real_name}}</span>
-               <p class="comment" title="{{fullText}}">{{{linkify text}}}</p>
-               {{#if replyTo}}
-                 <span class="reply-to">in reply to
-                   <span class="name">{{replyTo.name}}</span> from
-                   <a href={{show_comment ../../../../bug.id replyTo.id}}>
-                     c{{replyTo.id}}
-                   </a>
-                 </span>
-               {{/if}}
-               {{#if reviewOf}}
-                 <span class="review-of">review of
-                   <a href={{show_attach reviewOf}}>
-                     attachment {{reviewOf}}
-                   </a>
-                 </span>
-               {{/if}}
-               {{#if commentOn}}
-                 <span class="comment-on">on 
-                   <a href={{show_attach commentOn.id}}>
-                     attachment {{commentOn.id}} - {{commentOn.title}}
-                   </a>
-                 </span>
-               {{/if}}
-               <div class="comment-suffix">
-                 {{creator.name}} 
-                 <span class="timeago suffix-time" title="{{creation_time}}"></span>
-               </div>
-             {{/format_comment}}
+    </div>
+  </script>
+  
+  <script id="bug-events">
+    <div class="timeline-events">
+      {{#format_events}}
+      {{#each events}}
+        <div class="event">
+        {{#if comment}}
+           <div class="comment-item">
+           {{#format_comment comment}}
+             {{#if created}}
+               <span class="comment-on">Created 
+                 <a href={{show_attach created.id diff}}>
+                   attachment {{created.id}} - {{created.title}}
+                 </a>
+               </span>
+             {{/if}}
+             <span class="commenter name">{{format_name creator.real_name}}</span>
+             <p class="comment" title="{{fullText}}">{{{linkify text}}}</p>
+             {{#if replyTo}}
+               <span class="reply-to">in reply to
+                 <span class="name">{{replyTo.name}}</span> from
+                 <a href={{show_comment ../../../../bug.id replyTo.id}}>
+                   c{{replyTo.id}}
+                 </a>
+               </span>
+             {{/if}}
+             {{#if reviewOf}}
+               <span class="review-of">review of
+                 <a href={{show_attach reviewOf}}>
+                   attachment {{reviewOf}}
+                 </a>
+               </span>
+             {{/if}}
+             {{#if commentOn}}
+               <span class="comment-on">on 
+                 <a href={{show_attach commentOn.id}}>
+                   attachment {{commentOn.id}} - {{commentOn.title}}
+                 </a>
+               </span>
+             {{/if}}
+             <div class="comment-suffix">
+               {{creator.name}} 
+               <span class="timeago suffix-time" title="{{creation_time}}"></span>
              </div>
-          {{/if}}
-          {{#if changeset}}
-            <div class="changeset-item">
-            {{#with changeset}}
-            {{#format_changes}}
-            {{#each changes}}
-              {{#format_change}}
-              <div class="change">
-                <span class="bullet">&nbsp;</span>
-                <span class="field">{{field field_name}}</span>
-                {{#if removed}}
-                  <span class="removed">{{removed}}</span> ->
-                {{/if}}
-                <span class="added">
-                {{#if_bugid field_name}}
-                  <a href={{show_bug added}}>bug {{added}}</a>
-                {{else}}
-                  {{added}}
-                {{/if_bugid}}
-                </span>
-              {{#if attachment_id}}
-                on <a href={{show_attach attachment_id diff}}>attachment {{attachment_id diff}}</a>
+           {{/format_comment}}
+           </div>
+        {{/if}}
+        {{#if changeset}}
+          <div class="changeset-item">
+          {{#with changeset}}
+          {{#format_changes}}
+          {{#each changes}}
+            {{#format_change}}
+            <div class="change">
+              <span class="field">{{field field_name}}</span>
+              {{#if removed}}
+                <span class="removed">{{removed}}</span> ->
               {{/if}}
-              </div>
-              {{/format_change}}
-            {{/each}}
-            {{/format_changes}}
-            <div class="changeset-suffix">
-              {{changer.name}} 
-              <span class="suffix-time timeago" title="{{change_time}}"></span>
+              <span class="added">
+              {{#if_bugid field_name}}
+                <a href={{show_bug added}}>bug {{added}}</a>
+              {{else}}
+                {{added}}
+              {{/if_bugid}}
+              </span>
+            {{#if attachment_id}}
+              on <a href={{show_attach attachment_id diff}}>attachment {{attachment_id diff}}</a>
+            {{/if}}
             </div>
-            {{/with}}
-            </div>
-          {{/if}}
+            {{/format_change}}
+          {{/each}}
+          {{/format_changes}}
+          <div class="changeset-suffix">
+            {{changer.name}} 
+            <span class="suffix-time timeago" title="{{change_time}}"></span>
           </div>
-        {{/each}}
-        {{/format_events}}
-      </div>
+          {{/with}}
+          </div>
+        {{/if}}
+        </div>
+      {{/each}}
+      {{/format_events}}
     </div>
   </script>
   
@@ -128,7 +131,7 @@
     </div>
   </script>
 
-  <script id="assigned-item" type="text/html">
+  <script id="assigned-bug" type="text/html">
     <div class="assigned-item">
       <a href="{{show_bug bug.id}}" class="assigned-link" title="{{> bug_tooltip}}">
         <span class="bug-id">{{bug.id}}</span>

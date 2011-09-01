@@ -7,7 +7,7 @@ var utils = {
 
    dateString : function(daysAgo) {
       var date = utils.dateAgo(daysAgo);
-      return date.getFullYear() + "-" + date.getMonth() + "-" + date.getDate();
+      return date.getFullYear() + "-" + (date.getMonth() + 1) + "-" + date.getDate();
    },
    
    queryString : function() {

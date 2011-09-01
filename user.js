@@ -71,70 +71,70 @@ function User(username) {
          });   
       },
 
-      timeline: function(daysAgo, callback) {
-         var timeline = [];
-             
-         // get most recently changed CCed or assinged bugs
+      recent: function(daysAgo, callback, bugCallback) { 
+         console.log(utils.dateString(daysAgo))
+         // get most recently changed CCed or assigned bugs
          client.searchBugs({
             email1: username,
             email1_type: "equals",
             email1_cc: 1,
             email1_assigned_to: 1,
-            //email1_creator: 1,
-            //email1_comment_author: 1,
             changed_after: utils.dateString(daysAgo),
             order: "changeddate DESC",
-            include_fields: 'id,summary,status,resolution,history,comments,last_change_time'
-          },
-          function(err, bugs) {
-             if (err) {
-                return callback(err);
-             }
-             
-             // only get the recent events
-             bugs.forEach(function(bug) {        
-                var events = [];
+            limit: 20,
+            include_fields: 'id,summary,status,resolution,last_change_time'
+         },
+         function(err, bugs) {
+            if (err) {
+               return callback(err);
+            }
+            bugs.forEach(function(bug) {
+               client.getBug(bug.id, {
+                  include_fields: 'id,summary,status,resolution,history,comments,last_change_time'
+               },
+               function(error, bug) {
+                  if (error) {
+                     return bugCallback(error);
+                  }
+                  var events = [];
 
-                var history = bug.history;
-                history.reverse(); // newest to oldest
-                for (var i = 0; i < history.length; i++) {
-                   var changeset = history[i],
-                       time = changeset.change_time;
+                  var history = bug.history;
+                  history.reverse(); // newest to oldest
+                  for (var i = 0; i < history.length; i++) {
+                     var changeset = history[i],
+                         time = changeset.change_time;
 
-                   if (new Date(time) < utils.dateAgo(daysAgo)) {
-                      break;
-                   }          
-                   events.push({
-                      time: time,
-                      changeset: changeset,
-                      author: changeset.changer
-                   });
-                }
-                
-                var comments = bug.comments;
-                comments.reverse(); // newest to oldest
-                for (var i = 0; i < comments.length; i++) {
-                   var comment = comments[i],
-                       time = comment.creation_time;
+                     if (new Date(time) < utils.dateAgo(daysAgo)) {
+                        break;
+                     }          
+                     events.push({
+                        time: time,
+                        changeset: changeset,
+                        author: changeset.changer
+                     });
+                  }
 
-                   if (new Date(time) < utils.dateAgo(daysAgo)) {
-                      break;
-                   }
-                   events.push({
-                      time: time,
-                      comment: comment,
-                      author: comment.creator
-                   });
-                }
-                
-                events.sort(sortByTime);
+                  var comments = bug.comments;
+                  comments.reverse(); // newest to oldest
+                  for (var i = 0; i < comments.length; i++) {
+                     var comment = comments[i],
+                         time = comment.creation_time;
 
-                if (events.length) {
-                   timeline.push({bug: bug, events: events});                   
-                }
-             });
-             callback(null, timeline);
-         });
-     }
-  }
+                     if (new Date(time) < utils.dateAgo(daysAgo)) {
+                        break;
+                     }
+                     events.push({
+                        time: time,
+                        comment: comment,
+                        author: comment.creator
+                     });
+                  }
+                  events.sort(sortByTime);
+                  return bugCallback(null, {bug: bug, events: events});
+               }) // getBug()
+            }) // forEach
+            callback(null, bugs);
+         }) // searchBugs()
+      }
+   }
 }

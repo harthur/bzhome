@@ -64,9 +64,10 @@ var bzhome = {
 
    populate : function() {
       try {
-         var timelineItem = Handlebars.compile($("#timeline-item").html()),
+         var timelineBug = Handlebars.compile($("#timeline-bug").html()),
+             bugEvents = Handlebars.compile($("#bug-events").html()),
              reviewItem = Handlebars.compile($("#review-item").html()),
-             assignedItem = Handlebars.compile($("#assigned-item").html());
+             assignedBug = Handlebars.compile($("#assigned-bug").html());
       } catch(e) {
          // handlebars throws mysterious errors
          console.log(e)
@@ -130,7 +131,7 @@ var bzhome = {
          })
          $(".timeago").timeago();
       });
-      
+
       var assigned = $("#assigned .content");
       assigned.html("<img src='lib/indicator.gif' class='spinner'></img>");
 
@@ -139,22 +140,28 @@ var bzhome = {
          $("#assigned .count").html(bugs.length);
 
          bugs.forEach(function(bug) {
-            var html = assignedItem({ bug: bug });
+            var html = assignedBug({ bug: bug });
             assigned.append(html);
          })
          $(".timeago").timeago();
       });
       
-      var timeline = $("#timeline .content");
-      timeline.html("<img src='lib/indicator.gif' class='spinner'></img>");
+      var recent = $("#timeline .content");
+      recent.html("<img src='lib/indicator.gif' class='spinner'></img>");
       
-      user.timeline(1.5, function(err, items) {
-        timeline.empty();
-        for (var i = 0; i < items.length; i++) {
-            var html = timelineItem(items[i]);
-            timeline.append(html);
-        }
-        $(".timeago").timeago();
-     });
+      user.recent(1.5 /* days */, function(err, bugs) {
+         recent.empty();
+         for (var i = 0; i < bugs.length; i++) {
+            var html = timelineBug({ bug: bugs[i] });
+            recent.append(html);
+         }
+         $(".timeago").timeago();
+      },
+      function(err, events) {
+         var html = bugEvents(events);
+         $("#" + events.bug.id).append(html);
+
+         $(".timeago").timeago();
+      });
    }
 };
