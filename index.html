@@ -29,7 +29,6 @@
           <span class="bug-id">{{bug.id}}</span>
           <span class="bug-summary">{{bug.summary}}</span>
         </a>
-        <span class="bug-updated"><span class="timeago" title="{{bug.last_change_time}}"></span></span>
       </div>
     </div>
   </script>
@@ -42,13 +41,6 @@
         {{#if comment}}
            <div class="comment-item">
            {{#format_comment comment}}
-             {{#if created}}
-               <span class="comment-on">Created 
-                 <a href={{show_attach created.id diff}}>
-                   attachment {{created.id}} - {{created.title}}
-                 </a>
-               </span>
-             {{/if}}
              <span class="commenter name">{{format_name creator.real_name}}</span>
              <p class="comment" title="{{fullText}}">{{{linkify text}}}</p>
              {{#if replyTo}}
@@ -56,6 +48,13 @@
                  <span class="name">{{replyTo.name}}</span> from
                  <a href={{show_comment ../../../../bug.id replyTo.id}}>
                    c{{replyTo.id}}
+                 </a>
+               </span>
+             {{/if}}
+             {{#if created}}
+               <span class="comment-on">Created 
+                 <a href={{show_attach created.id diff}}>
+                   attachment {{created.id}} - {{created.title}}
                  </a>
                </span>
              {{/if}}
@@ -83,21 +82,44 @@
         {{#if changeset}}
           <div class="changeset-item">
           {{#with changeset}}
+          <span class="changeset-suffix">
+            {{changer.name}} 
+            <span class="suffix-time timeago" title="{{change_time}}"></span>
+          </span>
           {{#format_changes}}
           {{#each changes}}
             {{#format_change}}
             <div class="change">
               <span class="field">{{field field_name}}</span>
-              {{#if removed}}
-                <span class="removed">{{removed}}</span> ->
-              {{/if}}
-              <span class="added">
-              {{#if_bugid field_name}}
-                <a href={{show_bug added}}>bug {{added}}</a>
+              {{#if changed}} 
+                 <span class="removed">
+                   {{removed}} &rarr;
+                 </span>
+                 <span class="added">
+                   {{added}}
+                 </span>
               {{else}}
-                {{added}}
-              {{/if_bugid}}
-              </span>
+                {{#if removed}}
+                  <span class="removed">
+                  removed
+                  {{#if_bugid field_name}}
+                    <a href={{show_bug removed}}>bug {{removed}}</a>
+                  {{else}}
+                    {{removed}}
+                  {{/if_bugid}}
+                  </span>
+                {{/if}}
+                {{#if added}}
+                  <span class="added">
+                  added
+                  {{#if_bugid field_name}}
+                    <a href={{show_bug added}}>bug {{added}}</a>
+                  {{else}}
+                    {{added}}
+                  {{/if_bugid}}
+                  </span>
+                {{/if}}
+              {{/if}}
             {{#if attachment_id}}
               on <a href={{show_attach attachment_id diff}}>attachment {{attachment_id diff}}</a>
             {{/if}}
@@ -105,10 +127,6 @@
             {{/format_change}}
           {{/each}}
           {{/format_changes}}
-          <div class="changeset-suffix">
-            {{changer.name}} 
-            <span class="suffix-time timeago" title="{{change_time}}"></span>
-          </div>
           {{/with}}
           </div>
         {{/if}}

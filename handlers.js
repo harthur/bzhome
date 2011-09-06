@@ -111,6 +111,11 @@ Handlebars.registerHelper('format_change', function(block) {
       }
       change.field_name = "";
    }
+   
+   if (change.added && change.removed) {
+      change.changed = true;
+   }
+
    return block(change);
 });
 

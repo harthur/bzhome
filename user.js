@@ -72,7 +72,6 @@ function User(username) {
       },
 
       recent: function(daysAgo, callback, bugCallback) { 
-         console.log(utils.dateString(daysAgo))
          // get most recently changed CCed or assigned bugs
          client.searchBugs({
             email1: username,
