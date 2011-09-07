@@ -1,26 +1,58 @@
-function sortByTime(event1, event2) {
-   return new Date(event2.time) > new Date(event1.time);   
-}
 
-function User(username) {
+function User(username, daysAgo) {
    var client = bz.createClient({
       username: username
    });
 
+   var fields = 'id,summary,status,resolution,last_change_time';
+
    return {
       bugzilla: client,
 
+      bugs: function(methods, callback) {
+         var query = {
+            email1: username,
+            email1_type: "equals",
+            order: "changeddate DESC",
+            limit: 20,
+            changed_after: utils.dateAgo(daysAgo),
+            include_fields: fields
+         };
+
+         if (methods.indexOf('cced') >= 0) {
+            query['email1_cc'] = 1;
+         }
+         if (methods.indexOf('assigned') >= 0) {
+            query['email1_assigned_to'] = 1;
+         }
+         if (methods.indexOf('reporter') >= 0) {
+            query['email1_reporter'] = 1;
+         }
+         client.searchBugs(query, callback);
+      },
+      
+      component: function(product, component, callback) {
+         client.searchBugs({
+            product: product,
+            component: component,
+            include_fields: fields,
+            limit: 20,
+            changed_after: utils.dateAgo(daysAgo),
+            order: "changeddate DESC",
+         }, callback);
+      },
+      
       assigned: function(callback) {
         client.searchBugs({
            status: ["NEW", "UNCONFIRMED", "ASSIGNED", "REOPENED"],
            email1: username,
            email1_type: "equals",
            email1_assigned_to: 1,
-           include_fields: 'id,summary,status,resolution,last_change_time',
+           include_fields: fields,
            order: "changeddate DESC",
         }, callback);
       },
-
+ 
       requests: function(callback) {
          var reviews = [],
             feedbacks = [];
@@ -64,76 +96,11 @@ function User(username) {
                });
             });
             
-            reviews.sort(sortByTime);
-            feedbacks.sort(sortByTime);
+            reviews.sort(utils.byTime);
+            feedbacks.sort(utils.byTime);
             
             callback(null, { reviews: reviews, feedbacks: feedbacks });
          });   
-      },
-
-      recent: function(daysAgo, callback, bugCallback) { 
-         // get most recently changed CCed or assigned bugs
-         client.searchBugs({
-            email1: username,
-            email1_type: "equals",
-            email1_cc: 1,
-            email1_assigned_to: 1,
-            changed_after: utils.dateString(daysAgo),
-            order: "changeddate DESC",
-            limit: 20,
-            include_fields: 'id,summary,status,resolution,last_change_time'
-         },
-         function(err, bugs) {
-            if (err) {
-               return callback(err);
-            }
-            bugs.forEach(function(bug) {
-               client.getBug(bug.id, {
-                  include_fields: 'id,summary,status,resolution,history,comments,last_change_time'
-               },
-               function(error, bug) {
-                  if (error) {
-                     return bugCallback(error);
-                  }
-                  var events = [];
-
-                  var history = bug.history;
-                  history.reverse(); // newest to oldest
-                  for (var i = 0; i < history.length; i++) {
-                     var changeset = history[i],
-                         time = changeset.change_time;
-
-                     if (new Date(time) < utils.dateAgo(daysAgo)) {
-                        break;
-                     }          
-                     events.push({
-                        time: time,
-                        changeset: changeset,
-                        author: changeset.changer
-                     });
-                  }
-
-                  var comments = bug.comments;
-                  comments.reverse(); // newest to oldest
-                  for (var i = 0; i < comments.length; i++) {
-                     var comment = comments[i],
-                         time = comment.creation_time;
-
-                     if (new Date(time) < utils.dateAgo(daysAgo)) {
-                        break;
-                     }
-                     events.push({
-                        time: time,
-                        comment: comment,
-                        author: comment.creator
-                     });
-                  }
-                  events.sort(sortByTime);
-                  return bugCallback(null, {bug: bug, events: events});
-               }) // getBug()
-            }) // forEach
-            callback(null, bugs);
-         }) // searchBugs()
       }
    }
 }

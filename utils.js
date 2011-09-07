@@ -18,5 +18,9 @@ var utils = {
          query[pair[0]] = unescape(pair[1]);
       }
       return query;
+   },
+   
+   byTime : function(event1, event2) {
+      return new Date(event2.time) > new Date(event1.time);   
    }
 }

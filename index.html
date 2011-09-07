@@ -40,8 +40,9 @@
         <div class="event">
         {{#if comment}}
            <div class="comment-item">
+           <span class="bullet">·</span>
            {{#format_comment comment}}
-             <span class="commenter name">{{format_name creator.real_name}}</span>
+             <span class="commenter name"></span>
              <p class="comment" title="{{fullText}}">{{{linkify text}}}</p>
              {{#if replyTo}}
                <span class="reply-to">in reply to
@@ -73,7 +74,7 @@
                </span>
              {{/if}}
              <div class="comment-suffix">
-               {{creator.name}} 
+               {{format_name creator.real_name}}
                <span class="timeago suffix-time" title="{{creation_time}}"></span>
              </div>
            {{/format_comment}}
@@ -90,6 +91,7 @@
           {{#each changes}}
             {{#format_change}}
             <div class="change">
+            <span class="bullet">·</span>
               <span class="field">{{field field_name}}</span>
               {{#if changed}} 
                  <span class="removed">
@@ -140,11 +142,11 @@
     <div class="review-item">
       <div class="review-attachment">
         <a class="review-link" href={{show_attach attachment.id "edit"}}>{{attachment.description}}</a>
-        <span class="timeago bug-updated" title="{{attachment.last_change_time}}"></span>  
       </div>
       <div class="suffix">
         by {{flag.setter.name}}
         on <a href={{show_bug bug.id}} title="{{> bug_tooltip}}">bug {{bug.id}}</a>
+        <span class="timeago" title="{{attachment.last_change_time}}"></span>
       </div>
     </div>
   </script>
@@ -206,7 +208,7 @@
          </div>
        </section>
 
-       <section id="assigned">
+       <section id="assigned" style="display:none;">
          <div class="header">Assigned Bugs <span class="count"></span></div>
          <div class="content">
           

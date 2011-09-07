@@ -26,7 +26,7 @@ Handlebars.registerHelper('linkify', function(text) {
 
 Handlebars.registerHelper('format_events', function(block) {
    // limit events showing per bug to 4
-   this.events = this.events.slice(0, 1);
+   this.events = this.events.slice(0, 3);
    return block(this);
 })
 

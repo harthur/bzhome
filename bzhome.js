@@ -40,6 +40,8 @@ $(document).ready(function() {
 });
 
 var bzhome = {
+   daysAgo: 5,
+
    base: "https://bugzilla.mozilla.org",
    
    login : function(email) {
@@ -58,24 +60,181 @@ var bzhome = {
 
       localStorage[lsKey] = email;
       bzhome.email = email;
+      bzhome.user = User(email, bzhome.daysAgo);
 
       bzhome.populate();
    },
 
    populate : function() {
+      bzhome.populateAutocomplete();
+      bzhome.populateReviews();
+      bzhome.populateAssigned();
+
+      bzhome.fetchRecent();
+   },
+   
+   fetchRecent : function() {
+      $("#timeline .content").html("<img src='lib/indicator.gif' class='spinner'></img>");
+      
+      var recent = [];
+
+      async.parallel([
+         function(done) {
+            bzhome.user.bugs(['cced', 'assigned'], function(err, bugs) {
+               recent = recent.concat(bugs);
+               done();
+            })
+         },
+         function(done) {            
+            var components = JSON.parse(localStorage['components'] || '[]');
+
+            async.forEach(components, function(comp, done) {
+               bzhome.user.component(comp.product, comp.component, function(err, bugs) {
+                  recent = recent.concat(bugs);
+                  done();
+               })
+            }, function(err) {
+               done();
+            })  
+         },
+      ], function(err) {
+         // create timeline after all bugs have been fetched
+         bzhome.populateTimeline(recent);
+      });
+   },
+   
+   populateTimeline : function(bugs) {
       try {
-         var timelineBug = Handlebars.compile($("#timeline-bug").html()),
-             bugEvents = Handlebars.compile($("#bug-events").html()),
-             reviewItem = Handlebars.compile($("#review-item").html()),
-             assignedBug = Handlebars.compile($("#assigned-bug").html());
+         var timelineBug = Handlebars.compile($("#timeline-bug").html());
       } catch(e) {
-         // handlebars throws mysterious errors
+         console.log(e)
+      }
+      
+      // remove duplicate bugs
+      var unique = {};
+      bugs.forEach(function(bug) {
+         unique[bug.id] = bug;
+      })
+      bugs = _(unique).toArray();
+
+      var recent = $("#timeline .content");
+      recent.empty();
+      
+      bugs.sort(function(bug1, bug2) {
+         return new Date(bug2.last_change_time) > new Date(bug1.last_change_time);   
+      })
+
+      for (var i = 0; i < bugs.length; i++) {
+         var html = timelineBug({ bug: bugs[i] });
+         recent.append(html);
+      }
+      $(".timeago").timeago();
+      
+      // fetch the recent events for each bug asynchronously
+      bugs.forEach(bzhome.populateEvents);
+   },
+   
+   populateEvents : function(bug) {
+      try {
+         var bugEvents = Handlebars.compile($("#bug-events").html());
+      } catch(e) {
+         console.log(e)
+      }
+      
+      bzhome.user.bugzilla.getBug(bug.id, {
+         include_fields: 'id,summary,status,resolution,history,comments,last_change_time'
+      }, function(err, bug) {
+         if (err) {
+            return console.log(error);
+         }
+         var events = [];
+
+         var history = bug.history;
+         history.reverse(); // newest to oldest
+         for (var i = 0; i < history.length; i++) {
+            var changeset = history[i],
+                time = changeset.change_time;
+
+            if (new Date(time) < utils.dateAgo(bzhome.daysAgo)) {
+               break;
+            }          
+            events.push({
+               time: time,
+               changeset: changeset,
+               author: changeset.changer
+            });
+         }
+
+         var comments = bug.comments;
+         comments.reverse(); // newest to oldest
+         for (var i = 0; i < comments.length; i++) {
+            var comment = comments[i],
+                time = comment.creation_time;
+
+            if (new Date(time) < utils.dateAgo(bzhome.daysAgo)) {
+               break;
+            }
+            events.push({
+               time: time,
+               comment: comment,
+               author: comment.creator
+            });
+         }
+         events.sort(utils.byTime);
+      
+         var html = bugEvents({bug: bug, events:events});
+         $("#" + bug.id).append(html);
+
+         $(".timeago").timeago();
+      });
+   },
+
+   populateReviews : function() {
+      try {
+         var reviewItem = Handlebars.compile($("#review-item").html());
+      } catch(e) {
+         console.log(e)
+      }
+      
+      var reviews = $("#reviews .content");
+      reviews.html("<img src='lib/indicator.gif' class='spinner'></img>");
+
+      bzhome.user.requests(function(err, requests) {
+         reviews.empty();
+         $("#reviews .count").html(requests.reviews.length);
+
+         requests.reviews.forEach(function(request) {
+            var html = reviewItem(request);
+            reviews.append(html);
+         })
+         $(".timeago").timeago();
+      });
+   },
+   
+   populateAssigned: function() {
+      try {
+         var assignedBug = Handlebars.compile($("#assigned-bug").html());
+      } catch(e) {
          console.log(e)
       }
 
-      var user = User(bzhome.email);
-      
-      user.bugzilla.getConfiguration({
+      var assigned = $("#assigned .content");
+      assigned.html("<img src='lib/indicator.gif' class='spinner'></img>");
+
+      bzhome.user.assigned(function(err, bugs) {
+         assigned.empty();
+         $("#assigned .count").html(bugs.length);
+
+         bugs.forEach(function(bug) {
+            var html = assignedBug({ bug: bug });
+            assigned.append(html);
+         })
+         $(".timeago").timeago();
+      });
+   },
+  
+   populateAutocomplete : function() {      
+      bzhome.user.bugzilla.getConfiguration({
          flags: 0,
          cached_ok: 1
       },
@@ -116,52 +275,6 @@ var bzhome = {
               return item.string;
            }
          });
-      });
-      
-      var reviews = $("#reviews .content");
-      reviews.html("<img src='lib/indicator.gif' class='spinner'></img>");
-
-      user.requests(function(err, requests) {
-         reviews.empty();
-         $("#reviews .count").html(requests.reviews.length);
-
-         requests.reviews.forEach(function(request) {
-            var html = reviewItem(request);
-            reviews.append(html);
-         })
-         $(".timeago").timeago();
-      });
-
-      var assigned = $("#assigned .content");
-      assigned.html("<img src='lib/indicator.gif' class='spinner'></img>");
-
-      user.assigned(function(err, bugs) {
-         assigned.empty();
-         $("#assigned .count").html(bugs.length);
-
-         bugs.forEach(function(bug) {
-            var html = assignedBug({ bug: bug });
-            assigned.append(html);
-         })
-         $(".timeago").timeago();
-      });
-      
-      var recent = $("#timeline .content");
-      recent.html("<img src='lib/indicator.gif' class='spinner'></img>");
-      
-      user.recent(1.5 /* days */, function(err, bugs) {
-         recent.empty();
-         for (var i = 0; i < bugs.length; i++) {
-            var html = timelineBug({ bug: bugs[i] });
-            recent.append(html);
-         }
-         $(".timeago").timeago();
-      },
-      function(err, events) {
-         var html = bugEvents(events);
-         $("#" + events.bug.id).append(html);
-
-         $(".timeago").timeago();
       });
    }
 };

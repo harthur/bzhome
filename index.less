@@ -2,7 +2,7 @@
 @reallydark: #111;
 @grey: #555;
 @lightgrey: #E4E4E4;
-@verylight: #F3F3F3;
+@verylight: #F2F2F2;
 
 .cropped(@suffix: ellipsis) {
    display: inline-block;
@@ -35,7 +35,7 @@ a {
       text-decoration: underline;
    }
    &:visited {
-      color: #5043C4;
+      color: #4F4A9B;
    }
 }
 
@@ -53,13 +53,10 @@ section {
    }
 
    .content {
+      background-color: white;
       border: 1px solid @lightgrey;
       padding: .8em .7em .7em .7em;
    }
-}
-
-.name {
-  color: #13158C;
 }
 
 .count {
@@ -78,17 +75,13 @@ section {
    margin-left: 5px;
 }
 
-.bug-updated {
-   float: right;
-}
-
 .spinner {
    display: block;
    margin: auto;
 }
 
 .suffix {
-   margin-left: 1.3em;
+   margin-top: 0.2em;
    color: @grey;
    font-size: 94%;
 }
@@ -172,7 +165,7 @@ section {
 
 #side {
    float: right;
-   width: 312px;
+   width: 300px;
 }
 
 .components {
@@ -204,7 +197,8 @@ section {
    }
 
    .component-search {
-      margin-left: 0.5em;
+      margin-left: 0.4em;
+      width: 150px;
    }
 }
 
@@ -238,6 +232,10 @@ section {
       .review-link {
          color: inherit;
       }
+      
+      .timeago {
+         float: right;
+      }
    }
 }
 
@@ -250,7 +248,6 @@ section {
    
    .assigned-link {
       color: black;
-      
    }
 }
 
@@ -258,30 +255,36 @@ section {
    width: 550px;
    float: left;
    margin-bottom: 60px;
+   box-shadow: rgba(0,0,0,.1) 0 .15em 0.6em;
    
    .header {
       background-color: #DEF0F7;
    }
    
    .content {
-      padding-top: 1em;
+      padding-top: 0.4em;
+   }
+   
+   .bullet {
+      font-size: 1.1em;
+      font-weight: bold;
+      color: #666;
    }
 
    .timeline-item {
-      margin-bottom: 1.3em;
-
-      .event {
-        margin-left: 0.8em;
-        margin-bottom: 0.5em;
-        padding: 0.5em;
-        background-color: @verylight;
-        border-radius: 4px;
-      }
+      padding-bottom: 1em;
+      padding-top: 1em;
+      border-bottom: 1px solid #DDD;
       line-height: 1.2em;
    }
 
    .timeline-events {
-      margin-top: 0.1em;
+      margin-top: 0.2em;
+      padding-left: 0.1em;
+
+      .event {
+        margin-top: 0.5em;
+      }
    }
 
    .bug {
@@ -303,11 +306,6 @@ section {
 
       font-weight: bold;
       color: black;
-   }
-
-   .change {
-     border-radius: 2px;
-     display: inline-block;
    }
 
    .changeset-suffix, .comment-suffix {
