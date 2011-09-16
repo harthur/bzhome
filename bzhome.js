@@ -82,7 +82,7 @@ $(document).ready(function() {
 });
 
 var bzhome = {
-   daysAgo: 5,
+   bugLimit: 20,
 
    base: "https://bugzilla.mozilla.org",
    
@@ -102,7 +102,7 @@ var bzhome = {
          }
       }
       localStorage['bzhome-email'] = email;
-      bzhome.user = User(email, bzhome.daysAgo);
+      bzhome.user = new User(email, bzhome.bugLimit);
 
       bzhome.populate();
       $("#content").show();
@@ -239,8 +239,8 @@ var bzhome = {
       bugs.forEach(function(bug) { bzhome.populateEvents(bug, type) });
    },
    
-   populateEvents : function(bug, type) {      
-      bzhome.user.bugzilla.getBug(bug.id, {
+   populateEvents : function(bug, type) {
+      bzhome.user.client.getBug(bug.id, {
          include_fields: 'id,summary,status,resolution,history,comments,last_change_time'
       }, function(err, bug) {
          if (err) {
@@ -251,14 +251,9 @@ var bzhome = {
          var history = bug.history;
          history.reverse(); // newest to oldest
          for (var i = 0; i < history.length; i++) {
-            var changeset = history[i],
-                time = changeset.change_time;
-
-            if (new Date(time) < utils.dateAgo(bzhome.daysAgo)) {
-               break;
-            }          
+            var changeset = history[i];
             events.push({
-               time: time,
+               time: changeset.change_time,
                changeset: changeset,
                author: changeset.changer
             });
@@ -267,14 +262,9 @@ var bzhome = {
          var comments = bug.comments;
          comments.reverse(); // newest to oldest
          for (var i = 0; i < comments.length; i++) {
-            var comment = comments[i],
-                time = comment.creation_time;
-
-            if (new Date(time) < utils.dateAgo(bzhome.daysAgo)) {
-               break;
-            }
+            var comment = comments[i];
             events.push({
-               time: time,
+               time: comment.creation_time,
                comment: comment,
                author: comment.creator
             });
@@ -306,7 +296,7 @@ var bzhome = {
    },
   
    populateAutocomplete : function(element) {      
-      bzhome.user.bugzilla.getConfiguration({
+      bzhome.user.client.getConfiguration({
          flags: 0,
          cached_ok: 1
       },
