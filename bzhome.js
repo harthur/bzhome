@@ -1,4 +1,45 @@
 $(document).ready(function() {
+   try {
+      bzhome.templates = {
+         bugEvents: Handlebars.compile($("#bug-events").html()),
+         timelineBug: Handlebars.compile($("#timeline-bug").html()),
+         reviewItem: Handlebars.compile($("#review-item").html())
+      }
+   } catch(e) {
+      console.log(e);
+   }
+   
+   /* timeline types */
+   bzhome.components.forEach(function(comp) {
+      var name = bzhome.componentName(comp),
+          id = bzhome.componentId(comp);
+
+      $("<option value='" + id + "' title='" + name + "'>"
+        + comp.component + "</option>").prependTo("#component-types");
+
+      $("<div class=type-section></div>").attr("id", id).insertAfter($("#all"));
+   });
+
+   $("#add-comp-form").hide();
+   $("#timeline-type").change(function() {
+      var type = $(this).val();
+      if (type == "add") {
+         $("#add-comp-form").show();
+         //$("#new-component").get(0).focus();
+         return;
+      }
+      bzhome.showSection(type);
+   });
+   $("#timeline-type").val(bzhome.showing).change();
+
+   $("#add-comp-form").submit(function(event) {
+      event.preventDefault();
+
+      $(this).hide();
+      bzhome.addComponent($("#new-component").val());
+   });
+   
+   /* save the user info to localStorage and populate data */
    bzhome.login();
 
    var input = $("#login-name");
@@ -20,7 +61,7 @@ $(document).ready(function() {
    $("#file-form").submit(function(event) {
       event.preventDefault();
 
-      var [product, component] = $("#file-form .component-search").val().split("/");
+      var [product, component] = bzhome.toComponent($("#file-form .component-search").val());
       window.open(bzhome.base + "/enter_bug.cgi?"
                   + "product=" + encodeURIComponent(product) + "&"
                   + "component=" + encodeURIComponent(component));
@@ -29,13 +70,14 @@ $(document).ready(function() {
    $("#search-form").submit(function(event) {
       event.preventDefault();
 
-      var [product, component] = $("#search-form .component-search").val().split("/");      
+      var [product, component] = bzhome.toComponent($("#search-form .component-search").val());      
       window.open(bzhome.base + "/buglist.cgi?"
                   + "order=Last%20Changed&order=changeddate%20DESC" 
                   + "&product=" + encodeURIComponent(product) 
                   + "&component=" + encodeURIComponent(component));
       
    });
+
    $("#search-bugs").hide();
 });
 
@@ -44,52 +86,109 @@ var bzhome = {
 
    base: "https://bugzilla.mozilla.org",
    
+   get email() {
+      return localStorage['bzhome-email'];
+   },
+
    login : function(email) {
-      var lsKey = "bzhome-email";
       if (!email) {
          email = utils.queryString()['user'];
          if (!email) {
-            email = localStorage[lsKey];
+            email = bzhome.email; // in localStorage
             if (!email) {
                $("#content").hide();
                return;               
             }
          }
       }
-      $("#content").show();
-
-      localStorage[lsKey] = email;
-      bzhome.email = email;
+      localStorage['bzhome-email'] = email;
       bzhome.user = User(email, bzhome.daysAgo);
 
       bzhome.populate();
+      $("#content").show();
+   },
+   
+   get showing() {
+      return localStorage['bzhome-selected'] || "cced"; 
+   },
+   
+   showSection : function(section) {
+      $(".type-section").hide();
+      $("#" + section).show();
+
+      localStorage['bzhome-selected'] = section;
+   },
+   
+   get components() {
+      return JSON.parse(localStorage["bzhome-components"] || '[]')
+   },
+
+   addComponent : function(name) {
+      var [product, component] = bzhome.toComponent(name),
+          comp = { product: product, component: component },
+          id = bzhome.componentId(comp);
+
+      var components = bzhome.components.concat([comp])
+      localStorage['bzhome-components'] = JSON.stringify(components);
+      
+      $("<div class=type-section></div>").attr("id", id).insertAfter("#all");
+      bzhome.populateSections();
+      
+      $("<option value='" + id + "' title='" + name + "'>"
+        + component + "</option>").prependTo("#component-types");
+      $("#timeline-type").val(id).change();
+   },
+   
+   componentName : function(comp) {
+      return comp.product + "/" + comp.component; 
+   },
+   
+   toComponent : function(name) {
+      return name.split("/");  
+   },
+
+   componentId : function(comp) {
+      // safe to use as an element id
+      return comp.product.replace(" ", "_") + "-" + comp.component.replace(" ", "_");
    },
 
    populate : function() {
-      bzhome.populateAutocomplete();
-      bzhome.populateReviews();
-      bzhome.populateAssigned();
+      bzhome.populateAutocomplete($(".component-search, .new-component"));
 
-      bzhome.fetchRecent();
+      bzhome.populateReviews();
+      bzhome.populateSections();
    },
    
-   fetchRecent : function() {
-      $("#timeline .content").html("<img src='lib/indicator.gif' class='spinner'></img>");
-      
+   populateSections : function() {
+      $(".type-section").html("<img src='lib/indicator.gif' class='spinner'></img>");
+      bzhome.fetchRecent();      
+   },
+   
+   fetchRecent : function() {     
       var recent = [];
 
       async.parallel([
          function(done) {
-            bzhome.user.bugs(['cced', 'assigned'], function(err, bugs) {
+            bzhome.user.bugs(['cced'], function(err, bugs) {
+               bzhome.populateTimeline("cced", bugs);
+
                recent = recent.concat(bugs);
                done();
             })
          },
-         function(done) {            
-            var components = JSON.parse(localStorage['components'] || '[]');
+         function(done) {
+            bzhome.user.bugs(['assigned'], function(err, bugs) {
+               bzhome.populateTimeline("assigned", bugs);
 
-            async.forEach(components, function(comp, done) {
+               recent = recent.concat(bugs);
+               done();
+            })
+         },
+         function(done) {
+            async.forEach(bzhome.components, function(comp, done) {
                bzhome.user.component(comp.product, comp.component, function(err, bugs) {
+                  bzhome.populateTimeline(bzhome.componentId(comp), bugs);
+
                   recent = recent.concat(bugs);
                   done();
                })
@@ -98,18 +197,23 @@ var bzhome = {
             })  
          },
       ], function(err) {
-         // create timeline after all bugs have been fetched
-         bzhome.populateTimeline(recent);
+         // create "All" timeline after all bugs have been fetched
+          bzhome.populateTimeline("all", recent);
       });
    },
    
-   populateTimeline : function(bugs) {
-      try {
-         var timelineBug = Handlebars.compile($("#timeline-bug").html());
-      } catch(e) {
-         console.log(e)
-      }
-      
+   popuplateComponent : function(comp)  {
+      bzhome.user.component(comp.product, comp.component, function(err, bugs) {
+         bzhome.populateTimeline(bzhome.componentId(comp), bugs);
+
+         recent = recent.concat(bugs);
+         done();
+      }) 
+   },
+   
+   populateTimeline : function(type, bugs) {
+      var element = $("#" + type);
+
       // remove duplicate bugs
       var unique = {};
       bugs.forEach(function(bug) {
@@ -117,30 +221,25 @@ var bzhome = {
       })
       bugs = _(unique).toArray();
 
-      var recent = $("#timeline .content");
-      recent.empty();
+      element.empty();
       
       bugs.sort(function(bug1, bug2) {
          return new Date(bug2.last_change_time) > new Date(bug1.last_change_time);   
       })
 
+      var html = "";
       for (var i = 0; i < bugs.length; i++) {
-         var html = timelineBug({ bug: bugs[i] });
-         recent.append(html);
+         html += bzhome.templates.timelineBug({ bug: bugs[i] });
       }
+      element.append(html);
+
       $(".timeago").timeago();
-      
+
       // fetch the recent events for each bug asynchronously
-      bugs.forEach(bzhome.populateEvents);
+      bugs.forEach(function(bug) { bzhome.populateEvents(bug, type) });
    },
    
-   populateEvents : function(bug) {
-      try {
-         var bugEvents = Handlebars.compile($("#bug-events").html());
-      } catch(e) {
-         console.log(e)
-      }
-      
+   populateEvents : function(bug, type) {      
       bzhome.user.bugzilla.getBug(bug.id, {
          include_fields: 'id,summary,status,resolution,history,comments,last_change_time'
       }, function(err, bug) {
@@ -182,20 +281,14 @@ var bzhome = {
          }
          events.sort(utils.byTime);
       
-         var html = bugEvents({bug: bug, events:events});
-         $("#" + bug.id).append(html);
+         var html = bzhome.templates.bugEvents({ bug: bug, events:events });
+         $("#" + type + " .bug-" + bug.id).append(html);
 
          $(".timeago").timeago();
       });
    },
 
    populateReviews : function() {
-      try {
-         var reviewItem = Handlebars.compile($("#review-item").html());
-      } catch(e) {
-         console.log(e)
-      }
-      
       var reviews = $("#reviews .content");
       reviews.html("<img src='lib/indicator.gif' class='spinner'></img>");
 
@@ -203,37 +296,16 @@ var bzhome = {
          reviews.empty();
          $("#reviews .count").html(requests.reviews.length);
 
+         var html = "";
          requests.reviews.forEach(function(request) {
-            var html = reviewItem(request);
-            reviews.append(html);
+            html += bzhome.templates.reviewItem(request);
          })
-         $(".timeago").timeago();
-      });
-   },
-   
-   populateAssigned: function() {
-      try {
-         var assignedBug = Handlebars.compile($("#assigned-bug").html());
-      } catch(e) {
-         console.log(e)
-      }
-
-      var assigned = $("#assigned .content");
-      assigned.html("<img src='lib/indicator.gif' class='spinner'></img>");
-
-      bzhome.user.assigned(function(err, bugs) {
-         assigned.empty();
-         $("#assigned .count").html(bugs.length);
-
-         bugs.forEach(function(bug) {
-            var html = assignedBug({ bug: bug });
-            assigned.append(html);
-         })
+         reviews.append(html);
          $(".timeago").timeago();
       });
    },
   
-   populateAutocomplete : function() {      
+   populateAutocomplete : function(element) {      
       bzhome.user.bugzilla.getConfiguration({
          flags: 0,
          cached_ok: 1
@@ -243,22 +315,21 @@ var bzhome = {
          for (product in config.product) {
             var comps = config.product[product].component;
             for (component in comps) {
-               var string = product + "/" + component;
                components.push({
                   product: product,
                   component: component,
-                  string: string
+                  string: bzhome.componentName({product: product, component: component})
                });
             }
          }
          
-         $(".component-search").autocomplete({
+         element.autocomplete({
            list: components,
            minCharacters: 2,
            timeout: 200,
            adjustWidth: 280,
            template: function(item) {
-              return "<li value='" + string + "'><span class='product'>"
+              return "<li value='" + item.string + "'><span class='product'>"
                  + item.product + "</span>" + "<span class='component'>"
                  + item.component + "</span></li>"
            },

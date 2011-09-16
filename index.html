@@ -7,7 +7,7 @@
   <link rel="stylesheet/less" href="index.less" type="text/css">
 
   <script src="lib/less-1.1.3.min.js" type="text/javascript"></script>
-  <script src="lib/jquery-1.4.2.min.js" type="text/javascript"></script>
+  <script src="lib/jquery-1.6.4.min.js" type="text/javascript"></script>
   <script src="lib/jquery.timeago.js" type="text/javascript"></script>
   <script src="lib/jquery.ui.autocomplete.js"></script>
   <script src="lib/bz-0.2.2.js" type="text/javascript"></script>
@@ -22,7 +22,7 @@
   <script src="utils.js"></script>
   
   <script id="timeline-bug" type="text/html">
-    <div id="{{bug.id}}"class="timeline-item">
+    <div class="bug-{{bug.id}} timeline-item">
       <div class="timeline-bug bug">
         <a href="{{show_bug bug.id}}" class="bug-title" title="{{> bug_tooltip}}">
           <img id="bug-icon" hidden=true src="lib/bugzilla.png"/>
@@ -175,18 +175,42 @@
      </div>
      <div id="content">
        <section id="timeline">
-         <div class="header">Recently Updated Bugs</div>
+         <div class="header">Recently Updated Bugs
+           <div id="type-selector">
+             <select id="timeline-type">
+               <option value="cced">CCed</option>
+               <option value="assigned">Assigned</option>
+               <optgroup label="components" id="component-types">
+                 <option id="add-comp" value="add">add a component...</option>
+               </optgroup>
+               <option value="all">All</option>
+             </select>
+             <form id="add-comp-form">
+               <input id="new-component" class="component-search"></input>
+               <input class="submit" type="submit" value="Add"></input>
+             </form>
+           </div>
+         </div>
          <div class="content">
-          
+            <div id="cced" class="type-section">
+       
+            </div>
+            <div id="assigned" class="type-section">
+              
+            </div>
+            <div id="all" class="type-section">
+              
+            </div>
          </div>       
        </section>
+
        <div id="side">
        <section id="file-bug" class="components">
          <div class="header">
            <span class="component-label">File Bug</span>
            <form id="file-form">
              <input class="component-search" placeholder="in Component..."></input>
-             <input class="component-submit" type="submit" value="Go"></input>
+             <input class="submit" type="submit" value="Go"></input>
            </form>
          </div>
        </section>
@@ -196,20 +220,13 @@
            <span class="component-label">Search</span>
            <form id="search-form">
              <input class="component-search" placeholder="in Component..."></input>
-             <input class="component-submit" type="submit" value="Go"></input>
+             <input class="submit" type="submit" value="Go"></input>
            </form>
          </div>
        </section>
 
        <section id="reviews">
          <div class="header">Reviews <span class="count"></span></div>
-         <div class="content">
-          
-         </div>
-       </section>
-
-       <section id="assigned" style="display:none;">
-         <div class="header">Assigned Bugs <span class="count"></span></div>
          <div class="content">
           
          </div>

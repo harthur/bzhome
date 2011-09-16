@@ -21,12 +21,12 @@ Handlebars.registerHelper('timeago', function(date) {
 });
 
 Handlebars.registerHelper('linkify', function(text) {
-   return linkify(text).replace(/bug (\d+)/g, "<a href=" + bzhome.base + "/show_bug.cgi?id=$1>$&</a>")
+   return linkify(text).replace(/bug (\d+)/gi, "<a href=" + bzhome.base + "/show_bug.cgi?id=$1>$&</a>")
 })
 
 Handlebars.registerHelper('format_events', function(block) {
    // limit events showing per bug to 4
-   this.events = this.events.slice(0, 3);
+   this.events = this.events.slice(0, 1);
    return block(this);
 })
 
