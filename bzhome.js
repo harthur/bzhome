@@ -244,7 +244,7 @@ var bzhome = {
          include_fields: 'id,summary,status,resolution,history,comments,last_change_time'
       }, function(err, bug) {
          if (err) {
-            return console.log(error);
+            return console.log(err);
          }
          var events = [];
 
@@ -271,8 +271,25 @@ var bzhome = {
          }
          events.sort(utils.byTime);
       
-         var html = bzhome.templates.bugEvents({ bug: bug, events:events });
-         $("#" + type + " .bug-" + bug.id).append(html);
+         var html = bzhome.templates.bugEvents({ bug: bug, events:events }),
+             id = "#" + type + " .bug-" + bug.id;
+         $(id).append(html);
+         
+         $(id + " .event:not(:first-child)").hide();
+
+         // click first event to expand events
+         var hidden = true;
+         $(id + " .event:first-child").click(function() {
+            if (hidden) {
+               $(id + " .event").addClass("highlight").show();
+               hidden = false;
+            }
+            else {
+               $(id + " .event").removeClass("highlight");
+               $(id + " .event:not(:first-child)").hide();
+               hidden = true;
+            }
+         });
 
          $(".timeago").timeago();
       });

@@ -1,8 +1,8 @@
-
 @reallydark: #111;
 @grey: #555;
 @lightgrey: #E4E4E4;
 @verylight: #F2F2F2;
+@highlight: #FFEBFF;
 
 .cropped(@suffix: ellipsis) {
    display: inline-block;
@@ -270,15 +270,15 @@ section {
    }
    
    .bullet {
-      font-size: 1.1em;
+      font-size: 1.12em;
       font-weight: bold;
-      color: #666;
+      color: #606060;
    }
 
    .timeline-item {
       padding-bottom: 1em;
       padding-top: 1em;
-      border-bottom: 1px solid #DDD;
+      border-bottom: 1px solid #CCC;
       line-height: 1.2em;
    }
 
@@ -287,7 +287,20 @@ section {
       padding-left: 0.1em;
 
       .event {
-        margin-top: 0.5em;
+         padding-top: 0.7em;
+         padding-bottom: 0.7em;
+
+         &:first-child {
+            cursor: pointer;
+            
+            &:hover {
+              background-color: @highlight !important;
+            }
+         }
+         
+         &.highlight {
+            background-color: @highlight;
+         }
       }
    }
 

@@ -43,8 +43,9 @@ User.prototype.component = function(product, component, callback) {
 }
  
 User.prototype.requests = function(callback) {
-   var reviews = [],
-      feedbacks = [];
+   var name = this.username.replace(/@.+/, ""), // can't get full email if not logged in
+       reviews = [],
+       feedbacks = [];
 
    this.client.searchBugs({ 
       'field0-0-0': 'flag.requestee',
@@ -56,7 +57,6 @@ User.prototype.requests = function(callback) {
       if (err) {
          return callback(err);
       }
-      var name = this.username.replace(/@.+/, ""); // can't get full email if not logged in
 
       bugs.forEach(function(bug) {
          // only add attachments with this user as requestee
