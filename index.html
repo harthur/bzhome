@@ -40,7 +40,7 @@
         <div class="event">
         {{#if comment}}
            <div class="comment-item">
-           <span class="bullet">&#149;</span>
+           <span class="bullet">&middot;</span>
            {{#format_comment comment}}
              <span class="commenter name"></span>
              <p class="comment" title="{{fullText}}">{{{linkify text}}}</p>
@@ -91,7 +91,7 @@
           {{#each changes}}
             {{#format_change}}
             <div class="change">
-            <span class="bullet">&#149;</span>
+            <span class="bullet">&middot;</span>
               <span class="field">{{field field_name}}</span>
               {{#if changed}} 
                  <span class="removed">
