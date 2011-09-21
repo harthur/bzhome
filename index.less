@@ -301,6 +301,14 @@ section {
          &.highlight {
             background-color: @highlight;
          }
+
+         .created {
+            font-weight: bold;
+
+            &:before, &:after {
+               content: "*"
+            }
+         }
       }
    }
 

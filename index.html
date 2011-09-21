@@ -38,6 +38,16 @@
       {{#format_events}}
       {{#each events}}
         <div class="event">
+        {{#if created}}
+           <div class="created-item">
+           <span class="bullet">&middot;</span>
+           <span class="created">bug created</span>
+           </div>
+           <div class="comment-suffix">
+             {{format_name creator.real_name}}
+             <span class="timeago suffix-time" title="{{time}}"></span>
+           </div>
+        {{/if}}
         {{#if comment}}
            <div class="comment-item">
            <span class="bullet">&middot;</span>

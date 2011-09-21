@@ -241,7 +241,8 @@ var bzhome = {
    
    populateEvents : function(bug, type) {
       bzhome.user.client.getBug(bug.id, {
-         include_fields: 'id,summary,status,resolution,history,comments,last_change_time'
+         include_fields: 'id,summary,status,resolution,history,'
+           + 'comments,last_change_time,creator,creation_time'
       }, function(err, bug) {
          if (err) {
             return console.log(err);
@@ -270,6 +271,11 @@ var bzhome = {
             });
          }
          events.sort(utils.byTime);
+         events.push({
+            time: bug.creation_time,
+            creator: bug.creator,
+            created: true
+         })
       
          var html = bzhome.templates.bugEvents({ bug: bug, events:events }),
              id = "#" + type + " .bug-" + bug.id;
