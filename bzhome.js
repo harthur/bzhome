@@ -240,6 +240,8 @@ var bzhome = {
    },
    
    populateEvents : function(bug, type) {
+      var id = "#" + type + " .bug-" + bug.id;
+      
       bzhome.user.client.getBug(bug.id, {
          include_fields: 'id,summary,status,resolution,history,'
            + 'comments,last_change_time,creator,creation_time'
@@ -247,6 +249,11 @@ var bzhome = {
          if (err) {
             return console.log(err);
          }
+         
+         if (bug.status == "RESOLVED") {
+            $(id + " .timeline-bug").addClass("closed-bug");
+         }
+         
          var events = [];
 
          var history = bug.history;
@@ -275,10 +282,9 @@ var bzhome = {
             time: bug.creation_time,
             creator: bug.creator,
             created: true
-         })
+         });
       
-         var html = bzhome.templates.bugEvents({ bug: bug, events:events }),
-             id = "#" + type + " .bug-" + bug.id;
+         var html = bzhome.templates.bugEvents({ bug: bug, events:events });
          $(id).append(html);
          
          $(id + " .event:not(:first-child)").hide();
