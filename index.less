@@ -1,4 +1,5 @@
 @reallydark: #111;
+@greyed: #888;
 @grey: #555;
 @lightgrey: #E4E4E4;
 @verylight: #F2F2F2;
@@ -71,7 +72,7 @@ section {
 }
 
 .count {
-   color: #888;
+   color: @greyed;
    margin-left: 2px;
 
    &:before {
@@ -240,6 +241,30 @@ section {
       .timeago {
          float: right;
       }
+   }
+}
+
+#searches {
+   .search-link {
+      text-decoration: none;
+      color: inherit;
+      
+      &:hover {
+         text-decoration: underline;
+      }
+   }
+   
+   .search-name {
+      font-weight: bold;
+   }
+   
+   .search-counts {
+      float: right;
+   }
+   
+   .search-closed {
+      margin-left: 0.8em;
+      color: @greyed;
    }
 }
 

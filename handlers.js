@@ -16,6 +16,10 @@ Handlebars.registerHelper('show_attach', function(id, action) {
    return bzhome.base + "/attachment.cgi?id=" + id + "&action=" + action;
 })
 
+Handlebars.registerHelper('search_link', function(query) {
+   return bzhome.base + "/buglist.cgi?query_format=advanced&" + utils.queryString(query);
+})
+
 Handlebars.registerHelper('timeago', function(date) {
    return $.timeago(date);
 });

@@ -3,7 +3,9 @@ $(document).ready(function() {
       bzhome.templates = {
          bugEvents: Handlebars.compile($("#bug-events").html()),
          timelineBug: Handlebars.compile($("#timeline-bug").html()),
-         reviewItem: Handlebars.compile($("#review-item").html())
+         reviewItem: Handlebars.compile($("#review-item").html()),
+         searchItem: Handlebars.compile($("#search-item").html()),
+         searchCounts: Handlebars.compile($("#search-counts").html())
       }
    } catch(e) {
       console.log(e);
@@ -25,6 +27,7 @@ $(document).ready(function() {
       var type = $(this).val();
       if (type == "add") {
          $("#add-comp-form").show();
+         // this does something terrible to autocomplete
          //$("#new-component").get(0).focus();
          return;
       }
@@ -39,6 +42,15 @@ $(document).ready(function() {
       bzhome.addComponent($("#new-component").val());
    });
    
+   if (!bzhome.searches.length) {
+      bzhome.addSearch('Assigned', {
+         email1: bzhome.email,
+         emailtype1: "equals",
+         emailassigned_to1: 1,
+         query_format: "advanced"
+      });
+   }
+
    /* save the user info to localStorage and populate data */
    bzhome.login();
 
@@ -92,7 +104,7 @@ var bzhome = {
 
    login : function(email) {
       if (!email) {
-         email = utils.queryString()['user'];
+         email = utils.queryFromUrl()['user'];
          if (!email) {
             email = bzhome.email; // in localStorage
             if (!email) {
@@ -117,6 +129,24 @@ var bzhome = {
       $("#" + section).show();
 
       localStorage['bzhome-selected'] = section;
+   },
+
+   get searches() {
+      return JSON.parse(localStorage['bzhome-searches'] || '[]');
+   },
+   
+   addSearch : function(name, query) {
+      if (typeof query == "string") {
+         query = utils.queryFromUrl(query);
+      }
+      var searches = bzhome.searches;
+      searches.push({
+         name: name,
+         query: query
+      });
+
+      localStorage['bzhome-searches'] = JSON.stringify(searches);
+      bzhome.populateSearches();
    },
    
    get components() {
@@ -153,12 +183,21 @@ var bzhome = {
    },
 
    populate : function() {
-      bzhome.populateAutocomplete($(".component-search, .new-component"));
+      bzhome.populateAutocomplete();
 
       bzhome.populateReviews();
       bzhome.populateSections();
+      bzhome.populateSearches();
    },
    
+   spinner : function(elem, inline) {
+      var spinner = $("<img src='lib/indicator.gif' class='spinner'></img>");
+      if (inline) {
+         spinner.css({display: 'inline'});
+      }
+      elem.append(spinner);
+   },
+
    populateSections : function() {
       $(".type-section").html("<img src='lib/indicator.gif' class='spinner'></img>");
       bzhome.fetchRecent();      
@@ -254,9 +293,8 @@ var bzhome = {
             $(id + " .timeline-bug").addClass("closed-bug");
          }
          
-         var events = [];
-
-         var history = bug.history;
+         var events = [],
+             history = bug.history;
          history.reverse(); // newest to oldest
          for (var i = 0; i < history.length; i++) {
             var changeset = history[i];
@@ -307,24 +345,54 @@ var bzhome = {
       });
    },
 
+   populateSearches : function() {
+      var section = $("#searches .content");
+
+      bzhome.searches.forEach(function(search) {
+         var html = bzhome.templates.searchItem(search);
+         section.append(html);
+         
+         var counts = $("#search-" + search.name + " .search-counts");
+         bzhome.spinner(counts, true);
+         
+         
+         bzhome.user.client.searchBugs(search.query, function(err, bugs) {
+            var open = _(bugs).select(function(bug) {
+               return bug.status != "RESOLVED";
+            });
+            var closed = _(bugs).select(function(bug) {
+               return bug.status == "RESOLVED";
+            });
+            
+            var html = bzhome.templates.searchCounts({
+               open: open.length,
+               closed: closed.length
+            });
+
+            counts.html(html);
+         })
+      });
+   },
+
    populateReviews : function() {
-      var reviews = $("#reviews .content");
-      reviews.html("<img src='lib/indicator.gif' class='spinner'></img>");
+      var section = $("#reviews .content");
+      bzhome.spinner(section);
 
       bzhome.user.requests(function(err, requests) {
-         reviews.empty();
+         section.empty();
          $("#reviews .count").html(requests.reviews.length);
 
          var html = "";
          requests.reviews.forEach(function(request) {
             html += bzhome.templates.reviewItem(request);
          })
-         reviews.append(html);
+         section.append(html);
          $(".timeago").timeago();
       });
    },
   
-   populateAutocomplete : function(element) {      
+   populateAutocomplete : function() {
+      var input = $(".component-search, .new-component");
       bzhome.user.client.getConfiguration({
          flags: 0,
          cached_ok: 1
@@ -342,7 +410,7 @@ var bzhome = {
             }
          }
          
-         element.autocomplete({
+         input.autocomplete({
            list: components,
            minCharacters: 2,
            timeout: 200,

@@ -160,6 +160,26 @@
       </div>
     </div>
   </script>
+  
+  <script id="search-item" type="text/html">
+    <div id="search-{{name}}" class="search-item">
+      <a class="search-link" href={{search_link query}}>
+        <span class="search-name">{{name}}</span>
+        <span class="search-counts">
+
+        </span>
+      </a>
+    </div>
+  </script>
+
+  <script id="search-counts" type="text/html">
+    <span class="search-open">
+      Open: <span class="open-count">{{open}}</span> 
+    </span>
+    <span class="search-closed">
+      Closed: <span class="closed-count">{{closed}}</span>
+    </span>
+  </script>
 
 </head>
 <body>
@@ -230,6 +250,13 @@
          <div class="header">Reviews <span class="count"></span></div>
          <div class="content">
           
+         </div>
+       </section>
+       
+       <section id="searches">
+         <div class="header">Searches</div>
+         <div class="content">
+            
          </div>
        </section>
        </div>
