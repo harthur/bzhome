@@ -4,11 +4,10 @@ $(document).ready(function() {
          bugEvents: Handlebars.compile($("#bug-events").html()),
          timelineBug: Handlebars.compile($("#timeline-bug").html()),
          reviewItem: Handlebars.compile($("#review-item").html()),
-         searchItem: Handlebars.compile($("#search-item").html()),
-         searchCounts: Handlebars.compile($("#search-counts").html())
+         searchItem: Handlebars.compile($("#search-item").html())
       }
    } catch(e) {
-      console.log(e);
+      console.error(e);
    }
    
    /* timeline types */
@@ -70,6 +69,24 @@ $(document).ready(function() {
       input.blur();
    });
    
+   $("#new-search-form").hide();
+   $("#add-search-plus").click(function() {
+      $("#new-search-form").show();
+   });
+   $("#add-search-cancel").click(function() {
+      $("#new-search-form").hide();
+   });
+   $("#new-search-form").submit(function(event) {
+      event.preventDefault();
+
+      $(this).hide();
+      bzhome.addSearch($("#search-name").val(), $("#search-url").val());
+   });
+   $(".search-delete").click(function() {
+      var name = $(this).attr("name");
+      bzhome.removeSearch(name);
+   })
+   
    $("#file-form").submit(function(event) {
       event.preventDefault();
 
@@ -82,21 +99,57 @@ $(document).ready(function() {
    $("#search-form").submit(function(event) {
       event.preventDefault();
 
-      var [product, component] = bzhome.toComponent($("#search-form .component-search").val());      
-      window.open(bzhome.base + "/buglist.cgi?"
-                  + "order=Last%20Changed&order=changeddate%20DESC" 
-                  + "&product=" + encodeURIComponent(product) 
-                  + "&component=" + encodeURIComponent(component));
+      var [product, component] = bzhome.toComponent($("#search-form .component-search").val()),
+          string = $("#search-string").val(),
+          open = $("#search-open").is(":checked"),
+          closed = $("#search-closed").is(":checked");
+          
       
+      var url = bzhome.base + "/buglist.cgi?"
+                  + "query_format=advanced"
+                  + "&order=changeddate%20DESC";
+
+      if (string) {
+         url += "&short_desc_type=allwordssubstr&short_desc=" + encodeURIComponent(string)
+            + "&longdesc_type=allwordssubstr&longdesc=" + encodeURIComponent(string);
+      }
+      if (component) {
+         url += "&product=" + encodeURIComponent(product)
+            + "&component=" + encodeURIComponent(component);
+      }
+                  
+      if (open && !closed) {
+         url += bzhome.openUrl;
+      }
+      else if (closed && !open) {
+         url += bzhome.closedUrl;
+      }
+      window.open(url);
    });
 
-   $("#search-bugs").hide();
+    $("#search-bugs").hide();
 });
 
 var bzhome = {
    bugLimit: 20,
 
    base: "https://bugzilla.mozilla.org",
+
+   openStatus: ["REOPENED", "NEW", "ASSIGNED", "UNCONFIRMED"],
+   
+   closedStatus: ["RESOLVED", "VERIFIED"],
+   
+   statusUrl: function(statuses) {
+     return ["&bug_status=" + statuses[i] for (i in statuses)].join("");     
+   },
+   
+   get openUrl() {
+     return bzhome.statusUrl(bzhome.openStatus);
+   },
+   
+   get closedUrl() {
+     return bzhome.statusUrl(bzhome.closedStatus);
+   },
    
    get email() {
       return localStorage['bzhome-email'];
@@ -149,6 +202,16 @@ var bzhome = {
       bzhome.populateSearches();
    },
    
+   removeSearch : function(name) {
+      var searches = bzhome.searches;
+      searches = _(searches).reject(function(search) {
+        return search.name == name;
+      });
+      localStorage['bzhome-searches'] = JSON.stringify(searches);
+
+      $("#search-" + utils.idify(name)).remove();
+   },
+   
    get components() {
       return JSON.parse(localStorage["bzhome-components"] || '[]')
    },
@@ -196,6 +259,10 @@ var bzhome = {
          spinner.css({display: 'inline'});
       }
       elem.append(spinner);
+   },
+   
+   isOpen : function(bug) {
+     return bzhome.closedStatus.indexOf(bug.status) < 0 
    },
 
    populateSections : function() {
@@ -289,7 +356,7 @@ var bzhome = {
             return console.log(err);
          }
          
-         if (bug.status == "RESOLVED") {
+         if (!bzhome.isOpen(bug)) {
             $(id + " .timeline-bug").addClass("closed-bug");
          }
          
@@ -346,30 +413,23 @@ var bzhome = {
    },
 
    populateSearches : function() {
-      var section = $("#searches .content");
+      var section = $("#searches-list");
+      section.empty();
 
       bzhome.searches.forEach(function(search) {
          var html = bzhome.templates.searchItem(search);
          section.append(html);
          
-         var counts = $("#search-" + search.name + " .search-counts");
-         bzhome.spinner(counts, true);
-         
-         
-         bzhome.user.client.searchBugs(search.query, function(err, bugs) {
-            var open = _(bugs).select(function(bug) {
-               return bug.status != "RESOLVED";
-            });
-            var closed = _(bugs).select(function(bug) {
-               return bug.status == "RESOLVED";
-            });
-            
-            var html = bzhome.templates.searchCounts({
-               open: open.length,
-               closed: closed.length
-            });
+         var id = "#search-" + utils.idify(search.name);
 
-            counts.html(html);
+         var openQuery = _({status: bzhome.openStatus}).extend(search.query);
+         bzhome.user.client.countBugs(openQuery, function(err, count) {            
+            $(id + " .search-open").html("Open: " + (count || 0));
+         })
+
+         var closedQuery = _({status: bzhome.closedStatus}).extend(search.query);
+         bzhome.user.client.countBugs(closedQuery, function(err, count) {
+            $(id + " .search-closed").html("Closed: " + (count || 0));
          })
       });
    },

@@ -3,7 +3,7 @@
 @grey: #555;
 @lightgrey: #E4E4E4;
 @verylight: #F2F2F2;
-@highlight: #FFEBFF;
+@highlight: #FBF2FF;
 
 .cropped(@suffix: ellipsis) {
    display: inline-block;
@@ -24,9 +24,12 @@
 }
 
 body {
+  font-size: 13px;
+  color: @reallydark;
+}
+
+body, input, select, optgroup {
    font-family: Helvetica, sans-serif;
-   font-size: 13px;
-   color: @reallydark;
 }
 
 a {
@@ -195,11 +198,6 @@ section {
    form {
       display: inline-block;
    }
-   
-   .component-label {
-      display: inline-block;
-      width: 58px;
-   }
 
    .component-search {
       margin-left: 0.4em;
@@ -214,8 +212,31 @@ section {
 }
 
 #search-bugs {
+   margin-bottom: 1.4em;
+
    .header {
       background-color: #FCF7E1;
+   }
+
+   td {
+      padding-top: 0.5em;
+
+      &:first-child {
+         text-align: right;
+         padding-right: 0.5em;      
+      }
+   }
+   
+   input[type="checkbox"] {
+      margin-right: 0.25em;
+   }
+
+   #search-closed {
+      margin-left: 0.5em;
+   }
+
+   .submit {
+      float: right;
    }
 }
 
@@ -245,6 +266,12 @@ section {
 }
 
 #searches {
+   margin-bottom: 1em;
+   
+   .content {
+      padding-bottom: 0em;
+   }
+
    .search-link {
       text-decoration: none;
       color: inherit;
@@ -254,7 +281,29 @@ section {
       }
    }
    
-   .search-name {
+   .search-item {
+      padding: 0.3em 0;
+      
+      &:not(:last-child) {
+         border-bottom: 1px solid @verylight;      
+      }      
+   }
+
+   .search-delete {
+     display: inline-block;
+     margin-left: 0.2em;
+     padding: 0 1em 0 0.3em;
+     cursor: pointer;
+
+      &:hover {
+       &:before {
+          content: "X";
+          color: red;
+       }
+     }
+   }
+   
+   .search-link {
       font-weight: bold;
    }
    
@@ -262,9 +311,68 @@ section {
       float: right;
    }
    
+   .search-open {
+      color: inherit;
+   }
+   
    .search-closed {
       margin-left: 0.8em;
       color: @greyed;
+   }
+   
+   #add-search {
+      padding: 0.4em 0 0.15em 0;
+      color: @grey;
+      border-top: 1px solid @verylight;
+      overflow: hidden;
+   }
+
+   #add-search-plus {
+      float: right;
+      cursor: pointer;
+      padding-left: 0.4em;
+      margin-left: 0.2em;
+      font-size: 1.05em;
+      font-weight: bold;
+      color: @greyed;
+   }
+   
+   #new-search-form {
+      padding: 0.7em 0.5em 0.5em 0.5em;
+      margin: 0.2em 0;
+      border-radius: 3px;
+      box-shadow: 0 0 0.2em green,
+        inset 0 0 .2em green;
+
+      td {
+         padding-right: 0.2em;
+      }
+
+      #search-url {
+         width: 210px;
+      }
+   
+      
+      #add-search-buttons {
+         float: right;
+
+         #add-search-cancel {
+           color: inherit;
+           cursor: pointer;
+         }
+
+         .submit {
+           margin-left: 8px;
+         }
+      }
+   }
+   
+   #search-url-box {
+      margin: 0.3em 0;
+   }
+   
+   #advanced-search {
+      font-size: 0.8em;
    }
 }
 
@@ -282,6 +390,10 @@ section {
          float: right;
          font-weight: normal;
          display: inline-block;
+         
+         optgroup {
+            font-size: normal; 
+         }
 
          #add-comp-form {
             padding-top: 10px;

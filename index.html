@@ -24,7 +24,7 @@
   <script id="timeline-bug" type="text/html">
     <div class="bug-{{bug.id}} timeline-item">
       <div class="timeline-bug bug">
-        <a href="{{show_bug bug.id}}" class="bug-title" title="{{> bug_tooltip}}">
+        <a  class="bug-title" href="{{show_bug bug.id}}" title="{{> bug_tooltip}}">
           <img id="bug-icon" hidden=true src="lib/bugzilla.png"/>
           <span class="bug-id">{{bug.id}}</span>
           <span class="bug-summary">{{bug.summary}}</span>
@@ -162,23 +162,18 @@
   </script>
   
   <script id="search-item" type="text/html">
-    <div id="search-{{name}}" class="search-item">
-      <a class="search-link" href={{search_link query}}>
-        <span class="search-name">{{name}}</span>
-        <span class="search-counts">
-
-        </span>
-      </a>
+    <div id="search-{{idify name}}" class="search-item">
+      <a class="search-link" href={{search_link query}}>{{name}}</a>
+      <span class="search-delete" name="{{name}}" title="Delete this search">
+        &nbsp;
+      </span>
+      <span class="search-counts">
+        <a class="search-open" href='{{search_link query "OPEN"}}'>
+        </a>
+        <a class="search-closed" href='{{search_link query "CLOSED"}}'>
+        </a>
+      </span>
     </div>
-  </script>
-
-  <script id="search-counts" type="text/html">
-    <span class="search-open">
-      Open: <span class="open-count">{{open}}</span> 
-    </span>
-    <span class="search-closed">
-      Closed: <span class="closed-count">{{closed}}</span>
-    </span>
   </script>
 
 </head>
@@ -236,27 +231,85 @@
          </div>
        </section>
 
-       <section id="search-bugs" class="components">
+       <section id="search-bugs">
          <div class="header">
-           <span class="component-label">Search</span>
+           Search Bugs
+         </div>
+         <div class="content">
+           
            <form id="search-form">
-             <input class="component-search" placeholder="in Component..."></input>
-             <input class="submit" type="submit" value="Go"></input>
-           </form>
+             <table id="search-table">
+               <tr>
+                 <td>String:</td>
+                 <td><input id="search-string"></input></td>
+               </tr>
+               <tr>
+                 <td>Component:</td>
+                 <td><input id="search-component" class="component-search"></input></td>
+               </tr>
+               <tr>
+                 <td></td>
+                 <td>
+                   <input id="search-open" type="checkbox"></input>Open
+                   <input id="search-closed" type="checkbox"></input>Closed
+                 </td>
+               </tr>
+               <tr>
+                <td></td>
+                <td>
+                  <input class="submit" type="submit" value="Go"></input>
+                </td>
+               </tr>
+             </table>
+           </form>  
          </div>
        </section>
 
        <section id="reviews">
          <div class="header">Reviews <span class="count"></span></div>
          <div class="content">
-          
          </div>
        </section>
        
        <section id="searches">
          <div class="header">Searches</div>
          <div class="content">
-            
+            <div id="searches-list">
+              
+            </div>
+            <form id="new-search-form">
+              <table>
+              <tr>
+                <td>Name:</td>
+                <td><input id="search-name"></input></td>
+              </tr>
+              <tr>
+                <td>Url:</td>
+                <td><input id="search-url" placeholder="Paste buglist URL"></input></td>
+              </tr>
+              <tr>
+                <td></td>
+                <td>
+                  <span id="advanced-search">(from
+                    <a href="https://bugzilla.mozilla.org/query.cgi?format=advanced"
+                       target=_blank>Advanced Search</a>
+                  )</span>
+                </td>
+              </tr>
+              <tr>
+                <td></td>
+                <td>
+                  <span id="add-search-buttons">
+                  <a id="add-search-cancel">Cancel</a>
+                  <input class="submit" type="submit" value="Add"></input>
+                  </span>
+                </td>
+              </tr>
+              </table>
+            </form>
+            <div id="add-search">
+              <span id="add-search-plus" title="Add a search">＋</span>
+            </div>
          </div>
        </section>
        </div>

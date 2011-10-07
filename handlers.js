@@ -16,8 +16,15 @@ Handlebars.registerHelper('show_attach', function(id, action) {
    return bzhome.base + "/attachment.cgi?id=" + id + "&action=" + action;
 })
 
-Handlebars.registerHelper('search_link', function(query) {
-   return bzhome.base + "/buglist.cgi?query_format=advanced&" + utils.queryString(query);
+Handlebars.registerHelper('search_link', function(query, status) {
+   var url = bzhome.base + "/buglist.cgi?query_format=advanced&" + utils.queryString(query);
+   if (status == "OPEN") {
+     url += bzhome.openUrl;
+   }
+   else if (status == "CLOSED") {
+     url += bzhome.closedUrl;
+   }
+   return url;
 })
 
 Handlebars.registerHelper('timeago', function(date) {
@@ -25,7 +32,8 @@ Handlebars.registerHelper('timeago', function(date) {
 });
 
 Handlebars.registerHelper('linkify', function(text) {
-   return linkify(text).replace(/bug (\d+)/gi, "<a href=" + bzhome.base + "/show_bug.cgi?id=$1>$&</a>")
+   return linkify(text).replace(/bug (\d+)/gi, "<a target=_blank href="
+      + bzhome.base + "/show_bug.cgi?id=$1>$&</a>")
 })
 
 Handlebars.registerHelper('format_events', function(block) {
@@ -72,6 +80,10 @@ Handlebars.registerHelper('format_comment', function(comment, block) {
    return block(comment);
 });
 
+Handlebars.registerHelper('idify', function(name) {
+   return utils.idify(name);
+})
+
 Handlebars.registerHelper('format_name', function(name) {
    // remove nick from "Heather [:harth]"
    return name.replace(/[\[\(].+[\]\)]/, "")
@@ -101,7 +113,10 @@ Handlebars.registerHelper('format_change', function(block) {
    if (change.field_name == "flag") {
       // review?(x) review+ -> review+ x
       if (change.added == "review+" || change.added == "feedback+") {
-         var name = change.removed.match(regex)[2];
+         var name = "";
+         if (change.removed.match(regex)) {
+           name = change.removed.match(regex)[2];
+         }
          change.added += name;
          change.removed = "";
       }
