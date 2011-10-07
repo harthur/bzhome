@@ -24,7 +24,7 @@
   <script id="timeline-bug" type="text/html">
     <div class="bug-{{bug.id}} timeline-item">
       <div class="timeline-bug bug">
-        <a  class="bug-title" href="{{show_bug bug.id}}" title="{{> bug_tooltip}}">
+        <a class="bug-title" href="{{show_bug bug.id}}" target=_blank title="{{> bug_tooltip}}">
           <img id="bug-icon" hidden=true src="lib/bugzilla.png"/>
           <span class="bug-id">{{bug.id}}</span>
           <span class="bug-summary">{{bug.summary}}</span>
@@ -57,28 +57,28 @@
              {{#if replyTo}}
                <span class="reply-to">in reply to
                  <span class="name">{{replyTo.name}}</span> from
-                 <a href={{show_comment ../../../../bug.id replyTo.id}}>
+                 <a href={{show_comment ../../../../bug.id replyTo.id}} target=_blank>
                    c{{replyTo.id}}
                  </a>
                </span>
              {{/if}}
              {{#if created}}
                <span class="comment-on">Created 
-                 <a href={{show_attach created.id diff}}>
+                 <a href={{show_attach created.id diff}} target=_blank>
                    attachment {{created.id}} - {{created.title}}
                  </a>
                </span>
              {{/if}}
              {{#if reviewOf}}
                <span class="review-of">review of
-                 <a href={{show_attach reviewOf}}>
+                 <a href={{show_attach reviewOf}} target=_blank>
                    attachment {{reviewOf}}
                  </a>
                </span>
              {{/if}}
              {{#if commentOn}}
                <span class="comment-on">on 
-                 <a href={{show_attach commentOn.id}}>
+                 <a href={{show_attach commentOn.id}} target=_blank>
                    attachment {{commentOn.id}} - {{commentOn.title}}
                  </a>
                </span>
@@ -115,7 +115,7 @@
                   <span class="removed">
                   removed
                   {{#if_bugid field_name}}
-                    <a href={{show_bug removed}}>bug {{removed}}</a>
+                    <a href={{show_bug removed}} target=_blank>bug {{removed}}</a>
                   {{else}}
                     {{removed}}
                   {{/if_bugid}}
@@ -125,7 +125,7 @@
                   <span class="added">
                   added
                   {{#if_bugid field_name}}
-                    <a href={{show_bug added}}>bug {{added}}</a>
+                    <a href={{show_bug added}} target=_blank>bug {{added}}</a>
                   {{else}}
                     {{added}}
                   {{/if_bugid}}
@@ -133,7 +133,9 @@
                 {{/if}}
               {{/if}}
             {{#if attachment_id}}
-              on <a href={{show_attach attachment_id diff}}>attachment {{attachment_id diff}}</a>
+              on <a href={{show_attach attachment_id diff}} target=_blank>
+                attachment {{attachment_id diff}}
+              </a>
             {{/if}}
             </div>
             {{/format_change}}
@@ -151,11 +153,15 @@
   <script id="review-item" type="text/html">
     <div class="review-item">
       <div class="review-attachment">
-        <a class="review-link" href={{show_attach attachment.id "edit"}}>{{attachment.description}}</a>
+        <a class="review-link" href={{show_attach attachment.id "edit"}} target=_blank>
+          {{attachment.description}}
+        </a>
       </div>
       <div class="suffix">
         by {{flag.setter.name}}
-        on <a href={{show_bug bug.id}} title="{{> bug_tooltip}}">bug {{bug.id}}</a>
+        on <a href={{show_bug bug.id}} target=_blank title="{{> bug_tooltip}}">
+          bug {{bug.id}}
+        </a>
         <span class="timeago" title="{{attachment.last_change_time}}"></span>
       </div>
     </div>
@@ -163,14 +169,16 @@
   
   <script id="search-item" type="text/html">
     <div id="search-{{idify name}}" class="search-item">
-      <a class="search-link" href={{search_link query}}>{{name}}</a>
+      <a class="search-link" href={{search_link query}} target=_blank>
+        {{name}}
+      </a>
       <span class="search-delete" name="{{name}}" title="Delete this search">
         &nbsp;
       </span>
       <span class="search-counts">
-        <a class="search-open" href='{{search_link query "OPEN"}}'>
+        <a class="search-open" href='{{search_link query "OPEN"}}' target=_blank>
         </a>
-        <a class="search-closed" href='{{search_link query "CLOSED"}}'>
+        <a class="search-closed" href='{{search_link query "CLOSED"}}' target=_blank>
         </a>
       </span>
     </div>
