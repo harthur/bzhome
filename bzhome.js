@@ -161,11 +161,14 @@ var bzhome = {
          if (!email) {
             email = bzhome.email; // in localStorage
             if (!email) {
+               $("#login-name").addClass("logged-out");
                $("#content").hide();
                return;               
             }
          }
       }
+      $("#login-name").removeClass("logged-out");
+
       localStorage['bzhome-email'] = email;
       bzhome.user = new User(email, bzhome.bugLimit);
 

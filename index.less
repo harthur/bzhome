@@ -3,7 +3,7 @@
 @grey: #555;
 @lightgrey: #E4E4E4;
 @verylight: #F2F2F2;
-@highlight: #FBF2FF;
+@highlight: #FAF0FF;
 
 .cropped(@suffix: ellipsis) {
    display: inline-block;
@@ -145,6 +145,8 @@ section {
    font-family: Helvetica, sans-serif;
    
    #login {
+      font-family: Georgia, serif;
+      font-weight: normal;
       font-size: 50%;
       color: @grey;
       margin-left: 0.55em;
@@ -154,25 +156,27 @@ section {
    
    #login-form {
       display: inline-block;
-      margin-left: 0.35em;
+      margin-left: 0.1em;
    }
 
    #login-name {
       color: inherit;
       font-size: 100%;
+      font-family: Georgia, serif;
       box-sizing: border-box;
-      vertical-align: middle;
+      border: none;
+      vertical-align: 0px;
       margin-bottom: 2px;
-      min-width: 220px;
-      border: 1px solid #e9e9e9;
-      padding: 4px 10px 5px 9px;
-      font-family: georgia, serif;
+      min-width: 250px;
+      padding: 0.3em 0.3em 0.3em 0.3em;
       font-style: italic;
-      text-align: center;
+
+      &.logged-out {
+        border: 1px solid #e9e9e9; 
+      }
       
       &:focus {
-         border-size: 2px;
-         border-color: #aaa;
+         border: 1px solid #aaa;
       }
    }
 }
