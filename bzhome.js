@@ -40,6 +40,9 @@ $(document).ready(function() {
       $(this).hide();
       bzhome.addComponent($("#new-component").val());
    });
+
+   /* save the user info to localStorage and populate data */
+   bzhome.login();
    
    if (!bzhome.searches.length) {
       bzhome.addSearch('Assigned', {
@@ -49,9 +52,6 @@ $(document).ready(function() {
          query_format: "advanced"
       });
    }
-
-   /* save the user info to localStorage and populate data */
-   bzhome.login();
 
    var input = $("#login-name");
    input.val(bzhome.email);
