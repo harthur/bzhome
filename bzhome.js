@@ -43,15 +43,6 @@ $(document).ready(function() {
 
    /* save the user info to localStorage and populate data */
    bzhome.login();
-   
-   if (!bzhome.searches.length) {
-      bzhome.addSearch('Assigned', {
-         email1: bzhome.email,
-         emailtype1: "equals",
-         emailassigned_to1: 1,
-         query_format: "advanced"
-      });
-   }
 
    var input = $("#login-name");
    input.val(bzhome.email);
@@ -68,7 +59,6 @@ $(document).ready(function() {
       event.preventDefault();
       input.blur();
    });
-   
    $("#new-search-form").hide();
    $("#add-search-plus").click(function() {
       $("#new-search-form").show();
@@ -95,7 +85,6 @@ $(document).ready(function() {
                   + "product=" + encodeURIComponent(product) + "&"
                   + "component=" + encodeURIComponent(component));
    });
-   
    $("#search-form").submit(function(event) {
       event.preventDefault();
 
@@ -126,7 +115,6 @@ $(document).ready(function() {
       }
       window.open(url);
    });
-
     $("#search-bugs").hide();
 });
 
@@ -172,6 +160,15 @@ var bzhome = {
       localStorage['bzhome-email'] = email;
       bzhome.user = new User(email, bzhome.bugLimit);
 
+      if (!bzhome.searches.length) {
+         bzhome.addSearch('Assigned', {
+            email1: bzhome.email,
+            emailtype1: "equals",
+            emailassigned_to1: 1,
+            query_format: "advanced"
+         });
+      }
+
       bzhome.populate();
       $("#content").show();
    },
@@ -190,7 +187,12 @@ var bzhome = {
    get searches() {
       return JSON.parse(localStorage['bzhome-searches'] || '[]');
    },
-   
+ 
+   appendSearch : function(name, query) {
+     bzhome.addSearch(name, query);
+     bzhome.populateSearches();
+   },
+
    addSearch : function(name, query) {
       if (typeof query == "string") {
          query = utils.queryFromUrl(query);
@@ -204,7 +206,7 @@ var bzhome = {
       localStorage['bzhome-searches'] = JSON.stringify(searches);
       bzhome.populateSearches();
    },
-   
+  
    removeSearch : function(name) {
       var searches = bzhome.searches;
       searches = _(searches).reject(function(search) {
@@ -426,11 +428,12 @@ var bzhome = {
          var id = "#search-" + utils.idify(search.name);
 
          var openQuery = _({status: bzhome.openStatus}).extend(search.query);
-         bzhome.user.client.countBugs(openQuery, function(err, count) {            
+         
+         bzhome.user.client.countBugs(openQuery, function(err, count) {    
             $(id + " .search-open").html("Open: " + (count || 0));
-         })
-
+         });
          var closedQuery = _({status: bzhome.closedStatus}).extend(search.query);
+
          bzhome.user.client.countBugs(closedQuery, function(err, count) {
             $(id + " .search-closed").html("Closed: " + (count || 0));
          })
