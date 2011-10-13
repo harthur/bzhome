@@ -16,11 +16,14 @@
   <script src="lib/ba-linkify.min.js"></script>
   <script src="lib/underscore-min.js"></script>
   <script src="lib/async.min.js"></script>
+  <script src="lib/backbone.js"></script>
+  <script src="lib/backbone-localstorage.js"></script>
 
-  <script src="user.js"></script>
-  <script src="handlers.js"></script>
-  <script src="bzhome.js"></script>
-  <script src="utils.js"></script>
+  <script src="app/user.js"></script>
+  <script src="app/handlers.js"></script>
+  <script src="app/utils.js"></script>
+  <script src="app/searches.js"></script>
+  <script src="app/bzhome.js"></script>
   
   <script id="timeline-bug" type="text/html">
     <div class="bug-{{bug.id}} timeline-item">
@@ -177,10 +180,16 @@
         &nbsp;
       </span>
       <span class="search-counts">
+        {{#if open}}
         <a class="search-open" href='{{search_link query "OPEN"}}' target=_blank>
+          Open: {{open}}
         </a>
+        {{/if}}
+        {{#if closed}}
         <a class="search-closed" href='{{search_link query "CLOSED"}}' target=_blank>
+          Closed: {{closed}}
         </a>
+        {{/if}}
       </span>
     </div>
   </script>

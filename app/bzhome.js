@@ -59,23 +59,6 @@ $(document).ready(function() {
       event.preventDefault();
       input.blur();
    });
-   $("#new-search-form").hide();
-   $("#add-search-plus").click(function() {
-      $("#new-search-form").show();
-   });
-   $("#add-search-cancel").click(function() {
-      $("#new-search-form").hide();
-   });
-   $("#new-search-form").submit(function(event) {
-      event.preventDefault();
-
-      $(this).hide();
-      bzhome.addSearch($("#search-name").val(), $("#search-url").val());
-   });
-   $(".search-delete").click(function() {
-      var name = $(this).attr("name");
-      bzhome.removeSearch(name);
-   })
    
    $("#file-form").submit(function(event) {
       event.preventDefault();
@@ -116,6 +99,9 @@ $(document).ready(function() {
       window.open(url);
    });
     $("#search-bugs").hide();
+    
+   // initalize the searches section
+   var searchlist = new SearchList;
 });
 
 var bzhome = {
@@ -160,15 +146,6 @@ var bzhome = {
       localStorage['bzhome-email'] = email;
       bzhome.user = new User(email, bzhome.bugLimit);
 
-      if (!bzhome.searches.length) {
-         bzhome.addSearch('Assigned', {
-            email1: bzhome.email,
-            emailtype1: "equals",
-            emailassigned_to1: 1,
-            query_format: "advanced"
-         });
-      }
-
       bzhome.populate();
       $("#content").show();
    },
@@ -182,39 +159,6 @@ var bzhome = {
       $("#" + section).show();
 
       localStorage['bzhome-selected'] = section;
-   },
-
-   get searches() {
-      return JSON.parse(localStorage['bzhome-searches'] || '[]');
-   },
- 
-   appendSearch : function(name, query) {
-     bzhome.addSearch(name, query);
-     bzhome.populateSearches();
-   },
-
-   addSearch : function(name, query) {
-      if (typeof query == "string") {
-         query = utils.queryFromUrl(query);
-      }
-      var searches = bzhome.searches;
-      searches.push({
-         name: name,
-         query: query
-      });
-
-      localStorage['bzhome-searches'] = JSON.stringify(searches);
-      bzhome.populateSearches();
-   },
-  
-   removeSearch : function(name) {
-      var searches = bzhome.searches;
-      searches = _(searches).reject(function(search) {
-        return search.name == name;
-      });
-      localStorage['bzhome-searches'] = JSON.stringify(searches);
-
-      $("#search-" + utils.idify(name)).remove();
    },
    
    get components() {
@@ -255,7 +199,6 @@ var bzhome = {
 
       bzhome.populateReviews();
       bzhome.populateSections();
-      bzhome.populateSearches();
    },
    
    spinner : function(elem, inline) {
@@ -414,29 +357,6 @@ var bzhome = {
          });
 
          $(".timeago").timeago();
-      });
-   },
-
-   populateSearches : function() {
-      var section = $("#searches-list");
-      section.empty();
-
-      bzhome.searches.forEach(function(search) {
-         var html = bzhome.templates.searchItem(search);
-         section.append(html);
-         
-         var id = "#search-" + utils.idify(search.name);
-
-         var openQuery = _({status: bzhome.openStatus}).extend(search.query);
-         
-         bzhome.user.client.countBugs(openQuery, function(err, count) {    
-            $(id + " .search-open").html("Open: " + (count || 0));
-         });
-         var closedQuery = _({status: bzhome.closedStatus}).extend(search.query);
-
-         bzhome.user.client.countBugs(closedQuery, function(err, count) {
-            $(id + " .search-closed").html("Closed: " + (count || 0));
-         })
       });
    },
 
