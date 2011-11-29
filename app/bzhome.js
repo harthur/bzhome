@@ -191,7 +191,7 @@ var bzhome = {
 
    componentId : function(comp) {
       // safe to use as an element id
-      return comp.product.replace(" ", "_") + "-" + comp.component.replace(" ", "_");
+      return comp.product.replace(/\W/g, "_") + "-" + comp.component.replace(/\W/g, "_");
    },
 
    populate : function() {
