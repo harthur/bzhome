@@ -1,7 +1,9 @@
 $(function() {
    window.Search = Backbone.Model.extend({      
       name: '',
-      query: {}
+      query: {},
+      open: null,
+      closed: null
    });
 
    window.Searches = Backbone.Collection.extend({
@@ -80,8 +82,7 @@ $(function() {
 
       addSearch: function(search) {
          var view = new SearchRow({
-            model: search,
-            id: "search-" + utils.idify(search.get("name"))
+            model: search
          });
          $("#searches-list").append(view.render().el);
          
@@ -98,7 +99,7 @@ $(function() {
             search.set({
                closed: count
             });
-         })
+         });
       },
       
       submit: function(event) {

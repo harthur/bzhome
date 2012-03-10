@@ -2,9 +2,7 @@ $(document).ready(function() {
    try {
       bzhome.templates = {
          bugEvents: Handlebars.compile($("#bug-events").html()),
-         timelineBug: Handlebars.compile($("#timeline-bug").html()),
-         reviewItem: Handlebars.compile($("#review-item").html()),
-         searchItem: Handlebars.compile($("#search-item").html())
+         timelineBug: Handlebars.compile($("#timeline-bug").html())
       }
    } catch(e) {
       console.error(e);
@@ -102,6 +100,7 @@ $(document).ready(function() {
     
    // initalize the searches section
    var searchlist = new SearchList;
+   var reviewlist = new ReviewList;
 });
 
 var bzhome = {
@@ -197,7 +196,6 @@ var bzhome = {
    populate : function() {
       bzhome.populateAutocomplete();
 
-      bzhome.populateReviews();
       bzhome.populateSections();
    },
    
@@ -360,23 +358,6 @@ var bzhome = {
       });
    },
 
-   populateReviews : function() {
-      var section = $("#reviews .content");
-      bzhome.spinner(section);
-
-      bzhome.user.requests(function(err, requests) {
-         section.empty();
-         $("#reviews .count").html(requests.reviews.length);
-
-         var html = "";
-         requests.reviews.forEach(function(request) {
-            html += bzhome.templates.reviewItem(request);
-         })
-         section.append(html);
-         $(".timeago").timeago();
-      });
-   },
-  
    populateAutocomplete : function() {
       var input = $(".component-search, .new-component");
       bzhome.user.client.getConfiguration({

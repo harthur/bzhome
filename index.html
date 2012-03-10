@@ -22,22 +22,22 @@
   <script src="app/user.js"></script>
   <script src="app/handlers.js"></script>
   <script src="app/utils.js"></script>
+
   <script src="app/searches.js"></script>
+  <script src="app/reviews.js"></script>
   <script src="app/bzhome.js"></script>
   
   <script id="timeline-bug" type="text/html">
-    <div class="bug-{{bug.id}} timeline-item">
-      <div class="timeline-bug bug">
-        <a class="bug-title" href="{{show_bug bug.id}}" target=_blank title="{{> bug_tooltip}}">
-          <img id="bug-icon" hidden=true src="lib/bugzilla.png"/>
-          <span class="bug-id">{{bug.id}}</span>
-          <span class="bug-summary">{{bug.summary}}</span>
-        </a>
-      </div>
+    <div class="timeline-bug bug">
+      <a class="bug-title" href="{{show_bug bug.id}}" target=_blank title="{{> bug_tooltip}}">
+        <img id="bug-icon" hidden=true src="lib/bugzilla.png"/>
+        <span class="bug-id">{{bug.id}}</span>
+        <span class="bug-summary">{{bug.summary}}</span>
+      </a>
     </div>
   </script>
   
-  <script id="bug-events">
+  <script id="bug-events" type="text/html">
     <div class="timeline-events">
       {{#format_events}}
       {{#each events}}
@@ -155,19 +155,17 @@
   </script>
   
   <script id="review-item" type="text/html">
-    <div class="review-item">
-      <div class="review-attachment">
-        <a class="review-link" href={{show_attach attachment.id "edit"}} target=_blank>
-          {{attachment.description}}
-        </a>
-      </div>
-      <div class="suffix">
-        by {{flag.setter.name}}
-        on <a href={{show_bug bug.id}} target=_blank title="{{> bug_tooltip}}">
-          bug {{bug.id}}
-        </a>
-        <span class="timeago" title="{{attachment.last_change_time}}"></span>
-      </div>
+    <div class="review-attachment">
+      <a class="review-link" href={{show_attach attachment.id "edit"}} target=_blank>
+        {{attachment.description}}
+      </a>
+    </div>
+    <div class="suffix">
+      by {{flag.setter.name}}
+      on <a href={{show_bug bug.id}} target=_blank title="{{> bug_tooltip}}">
+        bug {{bug.id}}
+      </a>
+      <span class="timeago" title="{{attachment.last_change_time}}"></span>
     </div>
   </script>
   
@@ -286,6 +284,9 @@
        <section id="reviews">
          <div class="header">Reviews <span class="count"></span></div>
          <div class="content">
+           <div id="reviews-list">
+             
+           </div>
          </div>
        </section>
        
