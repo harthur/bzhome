@@ -1,5 +1,5 @@
 Handlebars.registerPartial("bug_tooltip", "bug {{bug.id}} - " + 
-  "{{bug.status}}{{#if bug.resolution.length}} {{bug.resolution}}{{/if}} - " + 
+  "{{bug.status}}{{#if bug.resolution}} {{bug.resolution}}{{/if}} - " + 
   "{{bug.summary}} (updated {{timeago bug.last_change_time}})"
 );
 

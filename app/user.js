@@ -3,7 +3,8 @@ function User(username, limit) {
    this.limit = limit;
 
    this.client = bz.createClient({
-      username: username
+      username: username,
+      url: "https://api-dev.bugzilla.mozilla.org/1.0"
    });
 }
 

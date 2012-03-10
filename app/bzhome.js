@@ -66,6 +66,7 @@ $(document).ready(function() {
                   + "product=" + encodeURIComponent(product) + "&"
                   + "component=" + encodeURIComponent(component));
    });
+   
    $("#search-form").submit(function(event) {
       event.preventDefault();
 
@@ -96,7 +97,8 @@ $(document).ready(function() {
       }
       window.open(url);
    });
-    $("#search-bugs").hide();
+  
+   $("#search-bugs").hide();
     
    // initalize the searches section
    var searchlist = new SearchList;
