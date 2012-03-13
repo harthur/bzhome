@@ -103,6 +103,7 @@ $(document).ready(function() {
    // initalize the searches section
    var searchlist = new SearchList;
    var reviewlist = new ReviewList;
+   var feedbacklist = new FeedbackList;
 });
 
 var bzhome = {

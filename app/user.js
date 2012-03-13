@@ -42,6 +42,12 @@ User.prototype.component = function(product, component, callback) {
       order: "changeddate DESC",
    }, callback);
 }
+
+User.prototype.reviews = function(callback) {
+  this.requests(function(requests) {
+    callback(requests.reviews);
+  });
+}
  
 User.prototype.requests = function(callback) {
    var name = this.username.replace(/@.+/, ""), // can't get full email if not logged in
