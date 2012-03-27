@@ -99,9 +99,9 @@ $(document).ready(function() {
    });
   
    $("#search-bugs").hide();
+   $("#searches").hide();
     
-   // initalize the searches section
-   var searchlist = new SearchList;
+   //var searchlist = new SearchList;
    var reviewlist = new ReviewList;
    var feedbacklist = new FeedbackList;
 });
