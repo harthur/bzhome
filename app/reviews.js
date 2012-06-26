@@ -23,9 +23,14 @@ $(function() {
    window.Feedbacks = Reviews.extend({
      localStorage: new Store("bzhome-feedbacks")
    });
+
+   window.SuperReviews = Reviews.extend({
+     localStorage: new Store("bzhome-superreviews")
+   });
    
    window.reviews = new Reviews;
    window.feedbacks = new Feedbacks;  
+   window.superReviews = new SuperReviews;
    
    window.ReviewRow = Backbone.View.extend({
       tagName: "div",
@@ -48,8 +53,21 @@ $(function() {
       type: "reviews",
 
       initialize: function() {
-         var collection = this.collection
-           = (this.type == "feedback" ? feedbacks : reviews);
+         var collection;
+
+         switch (this.type) {
+           case "feedback":
+             collection = this.collection = feedbacks;
+             break;
+           case "reviews":
+             collection = this.collection = reviews;
+             break;
+           case "superreview":
+             collection = this.collection = superReviews;
+             break;
+           default:
+             console.error("unknown type '" + this.type + "'!");
+         }
 
          collection.bind("add", this.addReview, this);
          collection.bind("reset", this.render, this);
@@ -60,8 +78,22 @@ $(function() {
          // but fetch from the server and update
          var type = this.type;
          bzhome.user.requests(function(err, requests) {
-            var items = type == "feedback" ? requests.feedbacks
-                          : requests.reviews;    
+            var items;
+
+            switch (type) {
+              case "feedback":
+                items = requests.feedbacks;
+                break;
+              case "reviews":
+                items = requests.reviews;
+                break;
+              case "superreview":
+                items = requests.superReviews;
+                break;
+              default:
+                console.error("unknown type '" + type + "'!");
+            }
+
             collection.reset(items);
          });
       },
@@ -87,5 +119,11 @@ $(function() {
       el: $("#feedbacks"),
       list: $("#feedbacks-list"),
       type: "feedback"
+   });
+
+   window.SuperReviewList = ReviewList.extend({
+      el: $("#superreviews"),
+      list: $("#superreviews-list"),
+      type: "superreview"
    });
 });

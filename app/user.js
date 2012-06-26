@@ -51,6 +51,7 @@ User.prototype.reviews = function(callback) {
  
 User.prototype.requests = function(callback) {
    var name = this.username.replace(/@.+/, ""), // can't get full email if not logged in
+       superReviews = [],
        reviews = [],
        feedbacks = [];
 
@@ -81,6 +82,9 @@ User.prototype.requests = function(callback) {
                      time: att.last_change_time
                   };
 
+                  if (flag.name == "superreview") {
+                     superReviews.push(request);
+                  }
                   if (flag.name == "review") {
                      reviews.push(request);
                   }
@@ -92,9 +96,10 @@ User.prototype.requests = function(callback) {
          });
       });
    
+      superReviews.sort(utils.byTime);
       reviews.sort(utils.byTime);
       feedbacks.sort(utils.byTime);
    
-      callback(null, { reviews: reviews, feedbacks: feedbacks });
+      callback(null, { superReviews: superReviews, reviews: reviews, feedbacks: feedbacks });
    });
 }
