@@ -104,6 +104,7 @@ $(document).ready(function() {
    //var searchlist = new SearchList;
    var reviewlist = new ReviewList;
    var feedbacklist = new FeedbackList;
+   var superreviewlist = new SuperReviewList;
 });
 
 var bzhome = {
