@@ -41,6 +41,7 @@ $(document).ready(function() {
 
    /* save the user info to localStorage and populate data */
    bzhome.login();
+   console.log("logged in");
 
    var input = $("#login-name");
    input.val(bzhome.email);
@@ -61,21 +62,19 @@ $(document).ready(function() {
    $("#file-form").submit(function(event) {
       event.preventDefault();
 
-      var [product, component] = bzhome.toComponent($("#file-form .component-search").val());
+      var nodestruct = bzhome.toComponent($("#file-form .component-search").val());
+      var product = nodestruct[0],
+          component = nodestruct[1];
+
       window.open(bzhome.base + "/enter_bug.cgi?"
                   + "product=" + encodeURIComponent(product) + "&"
                   + "component=" + encodeURIComponent(component));
    });
-   
+
    $("#search-form").submit(function(event) {
       event.preventDefault();
 
-      var [product, component] = bzhome.toComponent($("#search-form .component-search").val()),
-          string = $("#search-string").val(),
-          open = $("#search-open").is(":checked"),
-          closed = $("#search-closed").is(":checked");
-          
-      
+      var string = $("#search-string").val();
       var url = bzhome.base + "/buglist.cgi?"
                   + "query_format=advanced"
                   + "&order=changeddate%20DESC";
@@ -85,10 +84,17 @@ $(document).ready(function() {
             + "&longdesc_type=allwordssubstr&longdesc=" + encodeURIComponent(string);
       }
       if (component) {
+         var nodestruct = bzhome.toComponent($("#search-form .component-search").val());
+         var product = nodestruct[0],
+             component = nodestruct[1];
+
          url += "&product=" + encodeURIComponent(product)
             + "&component=" + encodeURIComponent(component);
       }
-                  
+
+      var open = $("#search-open").is(":checked"),
+          closed = $("#search-closed").is(":checked");
+
       if (open && !closed) {
          url += bzhome.openUrl;
       }
@@ -117,7 +123,11 @@ var bzhome = {
    closedStatus: ["RESOLVED", "VERIFIED"],
    
    statusUrl: function(statuses) {
-     return ["&bug_status=" + statuses[i] for (i in statuses)].join("");     
+     var string = "";
+     for (var i = 0; i < statuses.length; i++) {
+       string += "&bug_status=" + statuses[i];
+     }
+     return string;     
    },
    
    get openUrl() {
@@ -148,6 +158,7 @@ var bzhome = {
 
       localStorage['bzhome-email'] = email;
       bzhome.user = new User(email, bzhome.bugLimit);
+      console.log(bzhome.user);
 
       bzhome.populate();
       $("#content").show();
@@ -169,9 +180,12 @@ var bzhome = {
    },
 
    addComponent : function(name) {
-      var [product, component] = bzhome.toComponent(name),
-          comp = { product: product, component: component },
-          id = bzhome.componentId(comp);
+      var nodestruct = bzhome.toComponent(name);
+      var comp = {
+         product: nodestruct[0],
+         component: nodestruct[1]
+      };
+      var id = bzhome.componentId(comp);
 
       var components = bzhome.components.concat([comp])
       localStorage['bzhome-components'] = JSON.stringify(components);
@@ -280,7 +294,7 @@ var bzhome = {
       element.empty();
       
       bugs.sort(function(bug1, bug2) {
-         return new Date(bug2.last_change_time) > new Date(bug1.last_change_time);   
+         return new Date(bug2.last_change_time) - new Date(bug1.last_change_time);   
       })
 
       var html = "";

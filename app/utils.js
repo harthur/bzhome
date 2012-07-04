@@ -29,7 +29,7 @@ var utils = {
    },
    
    byTime : function(event1, event2) {
-      return new Date(event2.time) > new Date(event1.time);   
+      return new Date(event2.time) - new Date(event1.time);   
    },
    
    idify : function(name) {
