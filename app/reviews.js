@@ -101,10 +101,8 @@ $(function() {
       render: function(reviews) {
          this.list.empty();
          this.collection.each(_(this.addReview).bind(this));
-         if (this.collection.length) {
-            this.el.find(".count").html(this.collection.length);
-            $(".timeago").timeago();          
-         }
+         this.el.find(".count").html(this.collection.length);
+         $(".timeago").timeago();          
       },
 
       addReview: function(review) {
