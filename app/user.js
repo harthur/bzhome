@@ -53,13 +53,14 @@ User.prototype.requests = function(callback) {
    var name = this.username.replace(/@.+/, ""), // can't get full email if not logged in
        superReviews = [],
        reviews = [],
-       feedbacks = [];
+       feedbacks = [],
+       needInfos = [];
 
    this.client.searchBugs({ 
       'field0-0-0': 'flag.requestee',
       'type0-0-0': 'equals',
       'value0-0-0': this.username,
-      include_fields: 'id,summary,status,resolution,last_change_time,attachments'
+      include_fields: 'id,summary,status,resolution,last_change_time,attachments,flags'
    },
    function(err, bugs) {
       if (err) {
@@ -94,12 +95,27 @@ User.prototype.requests = function(callback) {
                }
             });                   
          });
+
+         if (bug.flags) {
+         bug.flags.forEach(function(flag) {
+            if (flag.requestee && flag.requestee.name == name
+                && flag.status == '?' && flag.name == 'needinfo') {
+               needInfos.push({
+                  flag: flag,
+                  attachment: null,
+                  bug: bug,
+                  time: null
+               });
+            }
+         });
+         }
       });
    
       superReviews.sort(utils.byTime);
       reviews.sort(utils.byTime);
       feedbacks.sort(utils.byTime);
+      // Sorting for needinfo is pointless because there is no time information.
    
-      callback(null, { superReviews: superReviews, reviews: reviews, feedbacks: feedbacks });
+      callback(null, { superReviews: superReviews, reviews: reviews, feedbacks: feedbacks, needInfos: needInfos });
    });
 }

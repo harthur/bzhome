@@ -170,6 +170,16 @@
       <span class="timeago" title="{{attachment.last_change_time}}"></span>
     </div>
   </script>
+
+  <script id="needinfo-item" type="text/html">
+    <div class="review-attachment">
+      <a class="review-link" href={{show_bug bug.id}} target=_blank title="{{> bug_tooltip}}">
+        {{bug.id}}: {{bug.summary}}
+      </a>
+    </div>
+    <div class="suffix">by {{flag.setter.name}}</div>
+  </script>
+
   
   <script id="search-item" type="text/html">
     <div id="search-{{idify name}}" class="search-item">
@@ -309,6 +319,16 @@
            </div>
          </div>
        </section>
+
+       <section id="needinfo">
+         <div class="header">Need info <span class="count"></span></div>
+         <div class="content">
+           <div id="needinfo-list">
+             
+           </div>
+         </div>
+       </section>
+
 
        <section id="searches">
          <div class="header">Searches</div>

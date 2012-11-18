@@ -27,10 +27,15 @@ $(function() {
    window.SuperReviews = Reviews.extend({
      localStorage: new Store("bzhome-superreviews")
    });
+
+   window.NeedInfos = Reviews.extend({
+     localStorage: new Store("bzhome-needinfo")
+   });
    
    window.reviews = new Reviews;
    window.feedbacks = new Feedbacks;  
    window.superReviews = new SuperReviews;
+   window.needInfos = new NeedInfos;
    
    window.ReviewRow = Backbone.View.extend({
       tagName: "div",
@@ -43,6 +48,16 @@ $(function() {
          $(this.el).html(this.template(this.model.toJSON()));
          return this;
       }
+   });
+
+   window.NeedInfoRow = Backbone.View.extend({
+       tagName: "div",
+       className: "needinfo-item",
+       template: Handlebars.compile($("#needinfo-item").html()),
+       render: function() {
+          $(this.el).html(this.template(this.model.toJSON()));
+          return this;
+       }
    });
 
    window.ReviewList = Backbone.View.extend({
@@ -64,6 +79,9 @@ $(function() {
              break;
            case "superreview":
              collection = this.collection = superReviews;
+             break;
+           case "needinfo":
+             collection = this.collection = needInfos;
              break;
            default:
              console.error("unknown type '" + this.type + "'!");
@@ -90,6 +108,10 @@ $(function() {
               case "superreview":
                 items = requests.superReviews;
                 break;
+              case "needinfo":
+                items = requests.needInfos;
+                console.log(requests);
+                break;
               default:
                 console.error("unknown type '" + type + "'!");
             }
@@ -106,9 +128,16 @@ $(function() {
       },
 
       addReview: function(review) {
-         var view = new ReviewRow({
-            model: review
-         });
+         var view;
+         if (this.type == 'needinfo') {
+           view = new NeedInfoRow({
+             model: review
+           });
+         } else {
+           view = new ReviewRow({
+             model: review
+           });
+         }
          this.list.append(view.render().el);
       }
    });
@@ -123,5 +152,11 @@ $(function() {
       el: $("#superreviews"),
       list: $("#superreviews-list"),
       type: "superreview"
+   });
+
+   window.NeedInfoList = ReviewList.extend({
+      el: $("#needinfo"),
+      list: $("#needinfo-list"),
+      type: "needinfo"
    });
 });
