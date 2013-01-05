@@ -3,8 +3,7 @@ function User(username, limit) {
    this.limit = limit;
 
    this.client = bz.createClient({
-      username: username,
-      url: "https://api-dev.bugzilla.mozilla.org/1.0"
+      username: username
    });
 }
 
@@ -30,9 +29,9 @@ User.prototype.bugs = function(methods, callback) {
    if (methods.indexOf('reporter') >= 0) {
       query['email1_reporter'] = 1;
    }
-   this.client.searchBugs(query, callback);   
+   this.client.searchBugs(query, callback);
 }
-     
+
 User.prototype.component = function(product, component, callback) {
    this.client.searchBugs({
       product: product,
@@ -48,14 +47,14 @@ User.prototype.reviews = function(callback) {
     callback(requests.reviews);
   });
 }
- 
+
 User.prototype.requests = function(callback) {
    var name = this.username.replace(/@.+/, ""), // can't get full email if not logged in
        superReviews = [],
        reviews = [],
        feedbacks = [];
 
-   this.client.searchBugs({ 
+   this.client.searchBugs({
       'field0-0-0': 'flag.requestee',
       'type0-0-0': 'equals',
       'value0-0-0': this.username,
@@ -92,14 +91,14 @@ User.prototype.requests = function(callback) {
                      feedbacks.push(request);
                   }
                }
-            });                   
+            });
          });
       });
-   
+
       superReviews.sort(utils.byTime);
       reviews.sort(utils.byTime);
       feedbacks.sort(utils.byTime);
-   
+
       callback(null, { superReviews: superReviews, reviews: reviews, feedbacks: feedbacks });
    });
 }
