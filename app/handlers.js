@@ -1,5 +1,5 @@
-Handlebars.registerPartial("bug_tooltip", "bug {{bug.id}} - " + 
-  "{{bug.status}}{{#if bug.resolution}} {{bug.resolution}}{{/if}} - " + 
+Handlebars.registerPartial("bug_tooltip", "bug {{bug.id}} - " +
+  "{{bug.status}}{{#if bug.resolution}} {{bug.resolution}}{{/if}} - " +
   "{{bug.summary}} (updated {{timeago bug.last_change_time}})"
 );
 
@@ -43,11 +43,14 @@ Handlebars.registerHelper('format_events', function(block) {
 })
 
 Handlebars.registerHelper('format_comment', function(comment, block) {
-   var lines = comment.text.split("\n");
+   var lines = [""];
+   if (comment.text) {
+      lines = comment.text.split("\n");
+   }
    lines = lines.filter(function(line) {
       return line && !line.match(/^(>|----)/);
    })
-   
+
    var match;
    if (match = /Created attachment (\d+)/.exec(lines[0])) {
       comment.created = {id: match[1], title: lines[1]};
@@ -130,7 +133,7 @@ Handlebars.registerHelper('format_change', function(block) {
       }
       change.field_name = "";
    }
-   
+
    if (change.added && change.removed) {
       change.changed = true;
    }
